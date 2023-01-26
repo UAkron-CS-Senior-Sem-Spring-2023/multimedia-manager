@@ -11,7 +11,7 @@ class Window {
     public:
         virtual ~Window() = default;
 
-        virtual void display();
+        virtual std::size_t display();
 };
 
 template <class WindowContainer>
@@ -34,7 +34,9 @@ class WindowManager {
         }
 
         void display() {
-            windows.at(activeWindow)->display();
+            while(activeWindow < windows.size()) {
+                activeWindow = windows.at(activeWindow)->display();
+            }
         }
     private:
         WindowContainer windows;
