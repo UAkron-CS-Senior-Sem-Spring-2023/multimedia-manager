@@ -1,19 +1,18 @@
-#include "window-manager.hpp"
+#include <QApplication>
+
+#include "main-window.hpp"
 
 #include <memory>
 #include <array>
 
-int main() {
-    std::array<std::unique_ptr<Window>, 1> windows;
-
-    auto windowManager = WindowManager(
-        std::move(windows)
-    );
-
-    windowManager.display();
+int main(int argc, char** argv) {
+    auto app = QApplication(argc, argv);
     // Unimplemented:
     // Gather user settings
     // Display their messaging sources
 
-    return 0;
+    MainWindow mw;
+    mw.show();
+
+    return app.exec();
 }

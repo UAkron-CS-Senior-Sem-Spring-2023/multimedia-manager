@@ -2,7 +2,7 @@ from alpine
 
 CMD ./MultimediaManager
 
-RUN apk add cmake make g++
+RUN apk add cmake make g++ qt6-qtbase-dev
 RUN mkdir build
 WORKDIR build
 ADD . /

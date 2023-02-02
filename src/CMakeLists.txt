@@ -3,4 +3,8 @@ target_sources(MultimediaManager
     PUBLIC dynamic-assert.cpp
     PUBLIC media.cpp
     PUBLIC message.cpp
+    
+    PUBLIC main-window.cpp
 )
+
+QT6_WRAP_CPP(main-window.cpp)
