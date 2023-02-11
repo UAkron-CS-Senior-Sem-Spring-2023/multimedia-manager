@@ -6,5 +6,5 @@ class MessagingRecipient {
     public:
         virtual ~MessagingRecipient() = default;
 
-        virtual send(const Message& message) const;
+        virtual void send(const Message& message) const;
 };
