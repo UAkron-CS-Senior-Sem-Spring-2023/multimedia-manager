@@ -25,6 +25,7 @@ class MainWindow : public QMainWindow {
         std::unique_ptr<QWidget> manageableWidget;
         std::unique_ptr<QGridLayout> manageableGrid;
 
+        std::unique_ptr<QWidget> manageableNamesWidget;
         std::unique_ptr<QVBoxLayout> manageableNamesLayout;
         std::vector<std::unique_ptr<QLabel>> manageableNames;
 
@@ -39,6 +40,7 @@ class MainWindow : public QMainWindow {
         std::unique_ptr<QWidget> managingWidget;
         std::unique_ptr<QGridLayout> managingGrid;
 
+        std::unique_ptr<QWidget> managingInfoWidget;
         std::unique_ptr<QVBoxLayout> managingInfoLayout;
         std::vector<std::unique_ptr<QLabel>> managingInfoLabels;
 

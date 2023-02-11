@@ -1,5 +1,7 @@
 #include "main-window.hpp"
 
+#include <QPalette>
+
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
 {
@@ -23,10 +25,13 @@ void MainWindow::constructManageableWidget() {
     manageableGrid->setColumnStretch(1, 1);
 
     // set up manageable list
-    manageableNamesLayout = std::make_unique<QVBoxLayout>();
+    manageableNamesWidget = std::make_unique<QWidget>();
+    manageableNamesWidget->setBackgroundRole(QPalette::Base);
+    manageableNamesWidget->setAutoFillBackground(true);
+    manageableNamesLayout = std::make_unique<QVBoxLayout>(manageableNamesWidget.get());
     manageableNamesLayout->setContentsMargins(0, 0, 0, 16);
 
-    manageableGrid->addLayout(manageableNamesLayout.get(), 1, 0);
+    manageableGrid->addWidget(manageableNamesWidget.get(), 0, 0, 1, 2);
 
     // set up manageable account type buttons
     manageableAccountsButton = std::make_unique<QPushButton>(tr("Managed Accounts"));
@@ -40,7 +45,7 @@ void MainWindow::constructManageableWidget() {
     manageableTypeGroupBox = std::make_unique<QGroupBox>(tr("Current Managed Type"));
     manageableTypeGroupBox->setLayout(manageableTypeLayout.get());
 
-    manageableGrid->addWidget(manageableTypeGroupBox.get(), 2, 0);
+    manageableGrid->addWidget(manageableTypeGroupBox.get(), 1, 0);
 }
 
 void MainWindow::constructManagingWidget() {
@@ -50,10 +55,13 @@ void MainWindow::constructManagingWidget() {
     managingGrid->setRowStretch(0, 1);
 
     // set up managed accounts info
-    managingInfoLayout = std::make_unique<QVBoxLayout>();
+    managingInfoWidget = std::make_unique<QWidget>();
+    managingInfoWidget->setBackgroundRole(QPalette::Base);
+    managingInfoWidget->setAutoFillBackground(true);
+    managingInfoLayout = std::make_unique<QVBoxLayout>(managingInfoWidget.get());
     managingInfoLayout->setContentsMargins(0, 0, 0, 16);
 
-    managingGrid->addLayout(managingInfoLayout.get(), 1, 0);
+    managingGrid->addWidget(managingInfoWidget.get(), 0, 0);
 
     // set up actionable buttons for that account
     managingSendMessageButton = std::make_unique<QPushButton>(tr("Send message"));
@@ -63,7 +71,8 @@ void MainWindow::constructManagingWidget() {
     managingActionButtonsLayout->addWidget(managingSendMessageButton.get());
     managingActionButtonsLayout->addStretch(1);
     managingActionButtonsLayout->addWidget(managingViewInboxButton.get());
-    managingActionButtonsLayout->setContentsMargins(0, 0, 0, 64);
+    // 66px magic number, gets buttons to align with lefthand side's textbox
+    managingActionButtonsLayout->setContentsMargins(0, 0, 0, 66);
 
-    managingGrid->addLayout(managingActionButtonsLayout.get(), 2, 0);
+    managingGrid->addLayout(managingActionButtonsLayout.get(), 1, 0);
 }
