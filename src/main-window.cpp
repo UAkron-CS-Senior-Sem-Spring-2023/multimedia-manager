@@ -1,7 +1,5 @@
 #include "main-window.hpp"
 
-
-
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
 {
@@ -10,6 +8,9 @@ MainWindow::MainWindow(QWidget* parent)
 
     constructManageableWidget();
     windowGrid->addWidget(manageableWidget.get(), 0, 0);
+
+    constructManagingWidget();
+    windowGrid->addWidget(managingWidget.get(), 0, 1);
 
     setCentralWidget(windowWidget.get());
 }
@@ -30,9 +31,7 @@ void MainWindow::constructManageableWidget() {
     // set up manageable account type buttons
 
     manageableAccountsButton = std::make_unique<QPushButton>(tr("Managed Accounts"));
-    manageableAccountsButton->setMaximumSize(160, 35);
     manageableAccountGroupsButton = std::make_unique<QPushButton>(tr("Managed Account Groups"));
-    manageableAccountGroupsButton->setMaximumSize(200, 35);
 
     manageableTypeLayout = std::make_unique<QHBoxLayout>();
     manageableTypeLayout->addWidget(manageableAccountsButton.get());
@@ -43,4 +42,27 @@ void MainWindow::constructManageableWidget() {
     manageableTypeGroupBox->setLayout(manageableTypeLayout.get());
 
     manageableGrid->addWidget(manageableTypeGroupBox.get(), 2, 0);
+}
+
+void MainWindow::constructManagingWidget() {
+    managingWidget = std::make_unique<QWidget>();
+
+    managingGrid = std::make_unique<QGridLayout>(managingWidget.get());
+    managingGrid->setRowStretch(0, 1);
+
+    managingInfoLayout = std::make_unique<QVBoxLayout>();
+    managingInfoLayout->setContentsMargins(0, 0, 0, 16);
+
+    managingGrid->addLayout(managingInfoLayout.get(), 1, 0);
+
+    managingSendMessageButton = std::make_unique<QPushButton>(tr("Send message"));
+    managingViewInboxButton = std::make_unique<QPushButton>(tr("View inbox"));
+
+    managingActionButtonsLayout = std::make_unique<QHBoxLayout>();
+    managingActionButtonsLayout->addWidget(managingSendMessageButton.get());
+    managingActionButtonsLayout->addStretch(1);
+    managingActionButtonsLayout->addWidget(managingViewInboxButton.get());
+    managingActionButtonsLayout->setContentsMargins(0, 0, 0, 64);
+
+    managingGrid->addLayout(managingActionButtonsLayout.get(), 2, 0);
 }

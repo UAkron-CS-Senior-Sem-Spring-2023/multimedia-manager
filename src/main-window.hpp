@@ -35,5 +35,14 @@ class MainWindow : public QMainWindow {
 
         // righthand side of application
         // contains the selected group of accounts/account and buttons to perform actions on that group/account
-        std::unique_ptr<QWidget> activeManageableWidget;
+        void constructManagingWidget();
+        std::unique_ptr<QWidget> managingWidget;
+        std::unique_ptr<QGridLayout> managingGrid;
+
+        std::unique_ptr<QVBoxLayout> managingInfoLayout;
+        std::vector<std::unique_ptr<QLabel>> managingInfoLabels;
+
+        std::unique_ptr<QHBoxLayout> managingActionButtonsLayout;
+        std::unique_ptr<QPushButton> managingSendMessageButton;
+        std::unique_ptr<QPushButton> managingViewInboxButton;
 };
