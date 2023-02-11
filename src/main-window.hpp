@@ -19,11 +19,21 @@ class MainWindow : public QMainWindow {
         std::unique_ptr<QWidget> windowWidget;
         std::unique_ptr<QGridLayout> windowGrid;
 
-        std::unique_ptr<QVBoxLayout> managedLayout;
-        std::vector<std::unique_ptr<QLabel>> managedNames;
+        // lefthand side of application
+        // contains list of groups of accounts/accounts and buttons to switch management style
+        void constructManageableWidget();
+        std::unique_ptr<QWidget> manageableWidget;
+        std::unique_ptr<QGridLayout> manageableGrid;
 
-        std::unique_ptr<QGroupBox> managedTypeGroupBox;
-        std::unique_ptr<QHBoxLayout> managedTypeLayout;
-        std::unique_ptr<QPushButton> managedAccountsButton;
-        std::unique_ptr<QPushButton> managedAccountGroupsButton;
+        std::unique_ptr<QVBoxLayout> manageableNamesLayout;
+        std::vector<std::unique_ptr<QLabel>> manageableNames;
+
+        std::unique_ptr<QGroupBox> manageableTypeGroupBox;
+        std::unique_ptr<QHBoxLayout> manageableTypeLayout;
+        std::unique_ptr<QPushButton> manageableAccountsButton;
+        std::unique_ptr<QPushButton> manageableAccountGroupsButton;
+
+        // righthand side of application
+        // contains the selected group of accounts/account and buttons to perform actions on that group/account
+        std::unique_ptr<QWidget> activeManageableWidget;
 };
