@@ -29,7 +29,6 @@ void MainWindow::constructManageableWidget() {
     manageableGrid->addLayout(manageableNamesLayout.get(), 1, 0);
 
     // set up manageable account type buttons
-
     manageableAccountsButton = std::make_unique<QPushButton>(tr("Managed Accounts"));
     manageableAccountGroupsButton = std::make_unique<QPushButton>(tr("Managed Account Groups"));
 
@@ -50,11 +49,13 @@ void MainWindow::constructManagingWidget() {
     managingGrid = std::make_unique<QGridLayout>(managingWidget.get());
     managingGrid->setRowStretch(0, 1);
 
+    // set up managed accounts info
     managingInfoLayout = std::make_unique<QVBoxLayout>();
     managingInfoLayout->setContentsMargins(0, 0, 0, 16);
 
     managingGrid->addLayout(managingInfoLayout.get(), 1, 0);
 
+    // set up actionable buttons for that account
     managingSendMessageButton = std::make_unique<QPushButton>(tr("Send message"));
     managingViewInboxButton = std::make_unique<QPushButton>(tr("View inbox"));
 
