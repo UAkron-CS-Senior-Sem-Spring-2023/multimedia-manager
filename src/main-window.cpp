@@ -28,16 +28,18 @@ void MainWindow::constructManageableWidget() {
     manageableGrid->addLayout(manageableNamesLayout.get(), 1, 0);
 
     // set up manageable account type buttons
-    manageableTypeLayout = std::make_unique<QHBoxLayout>();
-    manageableTypeGroupBox = std::make_unique<QGroupBox>(tr("Current Managed Type"));
 
     manageableAccountsButton = std::make_unique<QPushButton>(tr("Managed Accounts"));
     manageableAccountsButton->setMaximumSize(160, 35);
     manageableAccountGroupsButton = std::make_unique<QPushButton>(tr("Managed Account Groups"));
     manageableAccountGroupsButton->setMaximumSize(200, 35);
+
+    manageableTypeLayout = std::make_unique<QHBoxLayout>();
     manageableTypeLayout->addWidget(manageableAccountsButton.get());
     manageableTypeLayout->addWidget(manageableAccountGroupsButton.get());
     manageableTypeLayout->addStretch(1);
+    
+    manageableTypeGroupBox = std::make_unique<QGroupBox>(tr("Current Managed Type"));
     manageableTypeGroupBox->setLayout(manageableTypeLayout.get());
 
     manageableGrid->addWidget(manageableTypeGroupBox.get(), 2, 0);
