@@ -7,4 +7,6 @@ target_sources(MultimediaManager
     PUBLIC main-window.cpp
 )
 
-QT6_WRAP_CPP(main-window.cpp)
+QT6_WRAP_CPP(
+    main-window.cpp
+)

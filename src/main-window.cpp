@@ -17,6 +17,10 @@ MainWindow::MainWindow(QWidget* parent)
     setCentralWidget(windowWidget.get());
 }
 
+void onClickManageableAccountsButton() {
+
+}
+
 void MainWindow::constructManageableWidget() {
     int workingRow = 0;
     manageableWidget = std::make_unique<QWidget>();
@@ -72,7 +76,10 @@ void MainWindow::constructManageableWidget() {
 
     // set up manageable account type buttons
     manageableAccountsButton = std::make_unique<QPushButton>(tr("Managed Accounts"));
+    QObject::connect(manageableAccountsButton.get(), &QPushButton::clicked, this, &MainWindow::manageableAccountsButtonClicked);
     manageableAccountGroupsButton = std::make_unique<QPushButton>(tr("Managed Account Groups"));
+    QObject::connect(manageableAccountGroupsButton.get(), &QPushButton::clicked, this, &MainWindow::manageableAccountGroupsButtonClicked);
+    
     manageableTypeLayout = std::make_unique<QHBoxLayout>();
     manageableTypeLayout->addWidget(manageableAccountsButton.get());
     manageableTypeLayout->addWidget(manageableAccountGroupsButton.get());
@@ -126,4 +133,21 @@ void MainWindow::constructManagingWidget() {
 
     managingGrid->addLayout(managingActionButtonsLayout.get(), workingRow, 0);
     ++workingRow;
+}
+
+void MainWindow::updateManagingType(ManagingType type) {
+    managingType = type;
+
+    managingTypeStackedLayout->setCurrentIndex(managingType);
+    managingTypeInfoStackedLayout->setCurrentIndex(managingType);
+    modifyManageablesButtonsStackedLayout->setCurrentIndex(managingType);
+}
+
+void MainWindow::manageableAccountsButtonClicked() {
+    updateManagingType(ACCOUNTS);
+}
+
+void MainWindow::manageableAccountGroupsButtonClicked() {
+    updateManagingType(ACCOUNT_GROUPS);
+
 }

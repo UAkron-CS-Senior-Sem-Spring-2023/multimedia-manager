@@ -55,7 +55,9 @@ class MainWindow : public QMainWindow {
 
         std::unique_ptr<QGroupBox> manageableTypeGroupBox;
         std::unique_ptr<QHBoxLayout> manageableTypeLayout;
+        void manageableAccountsButtonClicked();
         std::unique_ptr<QPushButton> manageableAccountsButton;
+        void manageableAccountGroupsButtonClicked();
         std::unique_ptr<QPushButton> manageableAccountGroupsButton;
 
         // righthand side of application
@@ -75,4 +77,6 @@ class MainWindow : public QMainWindow {
         std::unique_ptr<QHBoxLayout> managingActionButtonsLayout;
         std::unique_ptr<QPushButton> managingSendMessageButton;
         std::unique_ptr<QPushButton> managingViewInboxButton;
+
+        void updateManagingType(ManagingType type);
 };
