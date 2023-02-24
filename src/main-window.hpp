@@ -39,7 +39,7 @@ class MainWindow : public QMainWindow {
 
         QWidget manageableNamesWidget;
         QVBoxLayout manageableNamesLayout;
-        QLabel manageableNames;
+        std::vector<QLabel> manageableNames;
 
         QStackedLayout modifyManageablesButtonsStackedLayout;
 
