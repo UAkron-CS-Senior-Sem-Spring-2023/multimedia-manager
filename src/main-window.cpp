@@ -1,5 +1,7 @@
 #include "main-window.hpp"
 
+#include <QGuiApplication>
+#include <QScreen>
 #include <QPalette>
 
 MainWindow::MainWindow(QWidget* parent)
@@ -27,6 +29,8 @@ MainWindow::MainWindow(QWidget* parent)
     managingSendMessageButton(QPushButton(tr("Send message"))),
     managingViewInboxButton(QPushButton(tr("View inbox")))
 {
+    resize(QGuiApplication::primaryScreen()->availableGeometry().size() * 0.7);
+
     layoutManageableWidget();
     windowGrid.addWidget(&manageableWidget, 0, 0);
 
