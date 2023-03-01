@@ -8,6 +8,9 @@ project(MultimediaManager
 add_executable(MultimediaManager)
 
 find_package(Qt6 REQUIRED COMPONENTS Widgets)
-target_link_libraries(MultimediaManager PRIVATE Qt6::Widgets)
+target_link_libraries(MultimediaManager
+    PRIVATE Qt6::Widgets
+    PRIVATE curl
+)
 
 add_subdirectory(src)

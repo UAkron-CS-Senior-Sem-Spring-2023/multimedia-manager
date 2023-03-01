@@ -3,6 +3,7 @@ target_sources(MultimediaManager
     PUBLIC dynamic-assert.cpp
     PUBLIC media.cpp
     PUBLIC message.cpp
+    PUBLIC request.cpp
     
     PUBLIC main-window.cpp
 )
