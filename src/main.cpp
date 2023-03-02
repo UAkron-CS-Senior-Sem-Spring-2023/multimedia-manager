@@ -8,7 +8,7 @@
 #include <iostream>
 
 int main(int argc, char** argv) {
-    std::optional<std::string> result = Request::send("https://www.google.com");
+    std::optional<std::string> result = Request::get("https://www.google.com");
     if (result) {
         std::cout << *result << std::endl;
     } else {

@@ -3,6 +3,7 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <unordered_map>
 
 #include <curl/curl.h>
 
@@ -10,7 +11,8 @@ class ImplRequest {
     public:
         static ImplRequest& singleton();
 
-        std::optional<std::string> send(const char* url);
+        std::optional<std::string> get(const std::string& url);
+        std::optional<std::string> post(const std::string& url, const std::unordered_map<std::string, std::string>& postFields);
     private:
 
         CURL* handle;
@@ -23,5 +25,6 @@ class ImplRequest {
 };
 
 namespace Request {
-    std::optional<std::string> send(const char* url);
+    std::optional<std::string> get(const std::string& url);
+    std::optional<std::string> post(const std::string& url, const std::unordered_map<std::string, std::string>& postFields);
 };
