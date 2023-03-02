@@ -8,5 +8,5 @@ CustomizablePostMessagingRecipient::CustomizablePostMessagingRecipient(std::stri
 
 std::optional<std::string> CustomizablePostMessagingRecipient::send(const Message& message) const {
     postMessageField.begin()->second = std::move(messageToString(message));
-    return Request::post(url, postFieldss); 
+    return Request::post(url, postFieldss);
 }
