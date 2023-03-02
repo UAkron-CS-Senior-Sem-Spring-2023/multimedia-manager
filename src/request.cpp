@@ -41,6 +41,19 @@ std::optional<std::string> Request::getImpl(const std::string& url) {
     }
 }
 
+std::string Request::postifyMappedValues(const std::unordered_map<std::string, std::string>& postFields) {
+    if (postFields.size() == 0) {
+        return "";
+    }
+
+    std::string postStr;
+    postStr += postFields.begin()->first + "=" + postFields.begin()->second;
+    for (auto postOptionIt = std::next(postFields.begin()); postOptionIt != postFields.end(); ++postOptionIt) {
+        postStr += "&" + postOptionIt->first + "=" + postOptionIt->second;
+    }
+    return postStr;
+}
+
 std::optional<std::string> Request::post(const std::string& url, const std::unordered_map<std::string, std::string>& postFields) {
     return singleton().postImpl(url, postFields);
 }
@@ -49,18 +62,7 @@ std::optional<std::string> Request::postImpl(const std::string& url, const std::
     data.clear();
     curl_easy_setopt(handle, CURLOPT_URL, url.c_str());
     curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, handleDataStatic);
-
-    std::string postFieldsStr;
-    for (const auto& postOption : postFields) {
-        postFieldsStr += "&" + postOption.first + "=" + postOption.second;
-    }
-
-    if (postFieldsStr.size() > 0) {
-        // + 1 to pass over initial &
-        curl_easy_setopt(handle, CURLOPT_POSTFIELDS, postFieldsStr.c_str() + 1);
-    } else {
-        curl_easy_setopt(handle, CURLOPT_POSTFIELDS, "");
-    }
+    curl_easy_setopt(handle, CURLOPT_POSTFIELDS, postifyMappedValues(postFields).c_str());
 
     CURLcode status = curl_easy_perform(handle);
     if (status != CURLE_OK) {

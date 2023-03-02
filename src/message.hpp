@@ -10,6 +10,7 @@ class MessageConstructor;
 class Message {
     public:
         Message(MessageConstructor messageConstructor);
+        std::string toString() const;
 
     private:
         static const bool STRING_PORTION = false;
@@ -17,6 +18,7 @@ class Message {
         std::vector<bool> orderedPortionsUsed;
         std::vector<std::string> stringPortions;
         std::vector<Media> mediaPortions;
+
 
         friend class MessageConstructor;
 };
