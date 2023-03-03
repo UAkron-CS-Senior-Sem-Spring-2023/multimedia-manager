@@ -7,6 +7,7 @@ target_sources(MultimediaManager
     PUBLIC messaging-recipient.cpp
     PUBLIC customizable-get-messaging-recipient.cpp
     PUBLIC customizable-post-messaging-recipient.cpp
+    PUBLIC google-gateway.cpp
     
     PUBLIC main-window.cpp
 )

@@ -3,22 +3,27 @@
 #include "main-window.hpp"
 #include "request.hpp"
 
-#include <memory>
+#include "google-gateway.hpp"
 
+#include <memory>
 #include <iostream>
 
 int main(int argc, char** argv) {
-    std::optional<std::string> result = Request::get("https://www.google.com");
-    if (result) {
-        std::cout << *result << std::endl;
-    } else {
-        std::cout << "IT FAILED!!!!" << std::endl;
-    }
+
+    // std::optional<std::string> result = Request::get("https://www.google.com");
+    // if (result) {
+    //     std::cout << *result << std::endl;
+    // } else {
+    //     std::cout << "IT FAILED!!!!" << std::endl;
+    // }
+
     auto app = QApplication(argc, argv);
 
     // Unimplemented:
     // Gather user settings
     // Display their messaging sources
+    GoogleGateway gg;
+
 
     MainWindow mw;
     mw.show();
