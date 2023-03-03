@@ -76,8 +76,6 @@ std::optional<std::string> Request::postImpl(const std::string& url, const std::
     }
 }
 
-#include <iostream>
-
 std::optional<std::string> Request::smtp(
     const std::string& url,
     const std::string& oauthBearer,
@@ -104,15 +102,8 @@ std::optional<std::string> Request::smtpImpl(
     curl_easy_setopt(handle, CURLOPT_HTTPAUTH, CURLAUTH_BEARER);
     curl_easy_setopt(handle, CURLOPT_USE_SSL, CURLUSESSL_ALL);
 
-    char errbuf[CURL_ERROR_SIZE] = {0};
-    curl_easy_setopt(handle, CURLOPT_ERRORBUFFER, errbuf);
-
     auto status = curl_easy_perform(handle);
     if (status != CURLE_OK) {
-        std::cout << headers.curlMailFrom() << " " << oauthBearer << std::endl;
-        std::cout << curl_easy_strerror(status) << std::endl;
-        std::cout << std::string(errbuf, CURL_ERROR_SIZE) << std::endl;
-        std::cout << data << std::endl;
         return std::optional<std::string>();
     } else {
         return std::optional<std::string>(std::string(std::move(data)));

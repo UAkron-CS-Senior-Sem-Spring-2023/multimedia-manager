@@ -19,7 +19,7 @@ const QString CLIENT_SECRET = "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";
 GoogleGateway::GoogleGateway(QObject *parent) : QObject(parent)
 {
     this->google = new QOAuth2AuthorizationCodeFlow(this);
-    this->google->setScope("https://www.googleapis.com/auth/gmail.send https://mail.google.com/");
+    this->google->setScope("https://mail.google.com/");
 
     connect(this->google, &QOAuth2AuthorizationCodeFlow::authorizeWithBrowser, &QDesktopServices::openUrl);
     connect(this->google, &QOAuth2AuthorizationCodeFlow::granted, [=](){
