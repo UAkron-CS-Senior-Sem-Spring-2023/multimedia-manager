@@ -13,7 +13,7 @@ int main(int argc, char** argv) {
     
     QRequest& qr = QRequest::singleton();
 
-    auto headers = Request::SMTPHeaders("robertson.gregory.a@gmail.com", { "robertson.gregory.a@gmail.com"}, {}, "testing smtp");
+    auto headers = Request::SMTPHeaders("taggythrowaway@gmail.com", { "taggythrowaway@gmail.com"}, {}, "testing smtp");
     Request::MimeData md;
     md.addText("a lot of text!!!");
     qr.gmailSMTP(1, headers, md);

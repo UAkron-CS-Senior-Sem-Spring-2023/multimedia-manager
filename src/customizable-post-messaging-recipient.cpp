@@ -6,7 +6,7 @@ CustomizablePostMessagingRecipient::CustomizablePostMessagingRecipient(std::stri
     : url(std::move(url)), postMessageField({{std::move(postMessageFieldName), ""}}), postFields(std::move(additionalPostFields)), postFieldss({postMessageField, postFields})
 {}
 
-std::optional<std::string> CustomizablePostMessagingRecipient::send(const Message& message) const {
-    postMessageField.begin()->second = std::move(messageToString(message));
+std::optional<std::string> CustomizablePostMessagingRecipient::send(const Request::MimeData& message) const {
+    postMessageField.begin()->second = std::move(message.stringRepresentation());
     return Request::post(url, postFieldss);
 }

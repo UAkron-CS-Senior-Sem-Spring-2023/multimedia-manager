@@ -41,8 +41,11 @@ class Request {
 
                 void addText(const std::string& text);
 
+                const std::string& stringRepresentation() const;
                 const curl_mime* curlMimePost() const;
             private:
+                bool onlyStringContents = true;
+                std::string stringRepresentation_;
                 curl_mime* mime;
         };
 

@@ -10,6 +10,6 @@ CustomizableGetMessagingRecipient::CustomizableGetMessagingRecipient(std::string
     }
 }
 
-std::optional<std::string> CustomizableGetMessagingRecipient::send(const Message& message) const {
-    return Request::get(url.substr(0, messageInsertionPoint) + messageToString(message) + url.substr(messageInsertionPoint)); 
+std::optional<std::string> CustomizableGetMessagingRecipient::send(const Request::MimeData& message) const {
+    return Request::get(url.substr(0, messageInsertionPoint) + message.stringRepresentation() + url.substr(messageInsertionPoint)); 
 }

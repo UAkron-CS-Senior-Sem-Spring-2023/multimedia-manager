@@ -220,6 +220,14 @@ Request::MimeData::MimeData()
 void Request::MimeData::addText(const std::string& text) {
     curl_mimepart* part = curl_mime_addpart(mime);
     curl_mime_data(part, text.c_str(), CURL_ZERO_TERMINATED);
+    stringRepresentation_ += text;
+}
+
+const std::string& Request::MimeData::stringRepresentation() const {
+    if (!onlyStringContents) {
+        throw std::logic_error("Grabbed string representation of non-string only mime data");
+    }
+    return stringRepresentation_;
 }
 
 const curl_mime* Request::MimeData::curlMimePost() const {

@@ -13,7 +13,7 @@ class CustomizablePostMessagingRecipient : public MessagingRecipient {
         // postMessageField, stating what post field should be filled with 
         CustomizablePostMessagingRecipient(std::string url, std::string postMessageField, std::unordered_map<std::string, std::string> additionalPostFields = {});
 
-        std::optional<std::string> send(const Message& message) const override;
+        std::optional<std::string> send(const Request::MimeData& message) const override;
 
     private:
         std::string url;
