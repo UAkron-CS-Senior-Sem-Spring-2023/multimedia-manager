@@ -1,29 +1,22 @@
 #include <QApplication>
 
 #include "main-window.hpp"
-#include "request.hpp"
-
-#include "google-gateway.hpp"
-
-#include <memory>
-#include <iostream>
+#include "q-request.hpp"
 
 int main(int argc, char** argv) {
-
-    // std::optional<std::string> result = Request::get("https://www.google.com");
-    // if (result) {
-    //     std::cout << *result << std::endl;
-    // } else {
-    //     std::cout << "IT FAILED!!!!" << std::endl;
-    // }
 
     auto app = QApplication(argc, argv);
 
     // Unimplemented:
     // Gather user settings
     // Display their messaging sources
-    GoogleGateway gg;
+    
+    QRequest& qr = QRequest::singleton();
 
+    auto headers = Request::SMTPHeaders("robertson.gregory.a@gmail.com", { "robertson.gregory.a@gmail.com"}, {}, "testing smtp");
+    Request::MimeData md;
+    md.addText("a lot of text!!!");
+    qr.gmailSMTP(1, headers, md);
 
     MainWindow mw;
     mw.show();

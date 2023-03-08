@@ -5,6 +5,8 @@ project(MultimediaManager
     DESCRIPTION "A tool to manage multiple messaging accounts simultaneously"
 )
 
+set(CMAKE_AUTOMOC ON)
+
 add_executable(MultimediaManager)
 
 find_package(Qt6 REQUIRED COMPONENTS Widgets)
