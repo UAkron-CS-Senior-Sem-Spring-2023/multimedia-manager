@@ -128,8 +128,6 @@ std::optional<std::string> Request::imapImpl(const std::string& url, const std::
     }
 }
 
-#include <iostream>
-
 Request::SMTPHeaders::SMTPHeaders(std::string from_, std::vector<std::string> toRecipients_, std::vector<std::string> ccRecipients_, std::string subject_)
     : from(std::move(from_)), toRecipients(std::move(toRecipients_)), ccRecipients(std::move(ccRecipients_)), subject(std::move(subject_))
 {
