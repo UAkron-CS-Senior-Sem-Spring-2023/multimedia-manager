@@ -5,6 +5,8 @@ target_sources(MultimediaManager
     PUBLIC q-request.cpp
     PUBLIC customizable-get-messaging-recipient.cpp
     PUBLIC customizable-post-messaging-recipient.cpp
-    
-    PUBLIC main-window.cpp
+
+    PUBLIC account-manager.cpp
 )
+
+add_subdirectory(widgets)
