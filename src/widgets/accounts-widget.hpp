@@ -11,15 +11,14 @@
 
 #include <vector>
 
-#include "../account-manager.hpp"
+class MainWindow;
 
 class AccountsWidget : public QWidget {
     public:
-        AccountsWidget(QWidget* parent = nullptr);
-
-        void updateManagingType(AccountManager::ManagingType managingType);
-
+        AccountsWidget(MainWindow* accountManager, QWidget* parent = nullptr);
     private:
+        MainWindow* mainWindow;
+
         QGridLayout manageableGrid;
 
         QStackedLayout managingTypeStackedLayout;

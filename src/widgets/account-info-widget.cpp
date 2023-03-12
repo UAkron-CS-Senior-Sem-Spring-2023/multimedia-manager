@@ -1,7 +1,10 @@
 #include "account-info-widget.hpp"
 
-AccountInfoWidget::AccountInfoWidget(QWidget* parent)
+#include "main-window.hpp"
+
+AccountInfoWidget::AccountInfoWidget(MainWindow* mainWindow, QWidget* parent)
     : QWidget(parent),
+    mainWindow(mainWindow),
     managingGrid(QGridLayout(this)),
     managingAccountsInfoLabel(QLabel(tr("Account Information"))),
     managingAccountGroupsInfoLabel(QLabel(tr("Account Group Information"))),
@@ -17,6 +20,7 @@ AccountInfoWidget::AccountInfoWidget(QWidget* parent)
     managingTypeInfoStackedLayout.setCurrentIndex(AccountManager::INITIAL_MANAGING_TYPE);
     managingGrid.addLayout(&managingTypeInfoStackedLayout, workingRow, 0);
     ++workingRow;
+    connect(mainWindow, &MainWindow::onUpdateManagingType, &managingTypeInfoStackedLayout, &QStackedLayout::setCurrentIndex);
 
     // set up managed accounts info
     managingInfoWidget.setBackgroundRole(QPalette::Base);
@@ -35,8 +39,4 @@ AccountInfoWidget::AccountInfoWidget(QWidget* parent)
 
     managingGrid.addLayout(&managingActionButtonsLayout, workingRow, 0);
     ++workingRow;
-}
-
-void AccountInfoWidget::updateManagingType(AccountManager::ManagingType type) {
-    managingTypeInfoStackedLayout.setCurrentIndex(type);
 }

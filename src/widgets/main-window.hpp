@@ -21,9 +21,15 @@
 #include "../account-manager.hpp"
 
 class MainWindow : public QMainWindow {
+    Q_OBJECT
+
     public:
         MainWindow(QWidget* parent = nullptr);
+    signals:
+        void onUpdateManagingType(AccountManager::ManagingType managingType);
     private:
+        AccountManager accountManager;
+
         QWidget windowWidget;
         QGridLayout windowGrid;
 
@@ -37,6 +43,4 @@ class MainWindow : public QMainWindow {
         QPushButton manageableAccountsButton;
         void manageableAccountGroupsButtonClicked();
         QPushButton manageableAccountGroupsButton;
-
-        void updateManagingType(AccountManager::ManagingType managingType);
 };

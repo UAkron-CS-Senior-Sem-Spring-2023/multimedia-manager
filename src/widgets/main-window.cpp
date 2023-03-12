@@ -9,7 +9,8 @@
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent),
     windowGrid(QGridLayout(&windowWidget)),
-
+    accountsWidget(this),
+    accountInfoWidget(this),
     manageableAccountsButton(QPushButton(tr("Managed Accounts"))),
     manageableAccountGroupsButton(QPushButton(tr("Managed Account Groups"))),
     manageableTypeGroupBox(QGroupBox(tr("Current Managed Type")))
@@ -33,16 +34,10 @@ MainWindow::MainWindow(QWidget* parent)
     setCentralWidget(&windowWidget);
 }
 
-
-void MainWindow::updateManagingType(AccountManager::ManagingType type) {
-    accountsWidget.updateManagingType(type);
-    accountInfoWidget.updateManagingType(type);
-}
-
 void MainWindow::manageableAccountsButtonClicked() {
-    updateManagingType(AccountManager::ACCOUNTS);
+    onUpdateManagingType(AccountManager::ACCOUNTS);
 }
 
 void MainWindow::manageableAccountGroupsButtonClicked() {
-    updateManagingType(AccountManager::ACCOUNT_GROUPS);
+    onUpdateManagingType(AccountManager::ACCOUNT_GROUPS);
 }

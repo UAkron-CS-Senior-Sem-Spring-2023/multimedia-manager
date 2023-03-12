@@ -1,9 +1,10 @@
 #include "accounts-widget.hpp"
 
-#include "../account-manager.hpp"
+#include "main-window.hpp"
 
-AccountsWidget::AccountsWidget(QWidget* parent)
+AccountsWidget::AccountsWidget(MainWindow* mainWindow, QWidget* parent)
     : QWidget(parent),
+    mainWindow(mainWindow),
     manageableGrid(QGridLayout(this)),
     managingAccountsLabel(QLabel(tr("Managed Accounts"))),
     managingAccountGroupsLabel(QLabel(tr("Managed Account Groups"))),
@@ -21,8 +22,8 @@ AccountsWidget::AccountsWidget(QWidget* parent)
 
     managingTypeStackedLayout.insertWidget(AccountManager::ACCOUNTS, &managingAccountsLabel);
     managingTypeStackedLayout.insertWidget(AccountManager::ACCOUNT_GROUPS, &managingAccountGroupsLabel);
-    
     managingTypeStackedLayout.setCurrentIndex(AccountManager::INITIAL_MANAGING_TYPE);
+    connect(mainWindow, &MainWindow::onUpdateManagingType, &managingTypeStackedLayout, &QStackedLayout::setCurrentIndex);
     manageableGrid.addLayout(&managingTypeStackedLayout, workingRow, 0);
     ++workingRow;
 
@@ -47,11 +48,7 @@ AccountsWidget::AccountsWidget(QWidget* parent)
     modifyManageablesButtonsStackedLayout.insertWidget(AccountManager::ACCOUNT_GROUPS, &modifyManageableAccountGroupWidget);
 
     modifyManageablesButtonsStackedLayout.setCurrentIndex(AccountManager::INITIAL_MANAGING_TYPE);
+    connect(mainWindow, &MainWindow::onUpdateManagingType, &modifyManageablesButtonsStackedLayout, &QStackedLayout::setCurrentIndex);
     manageableGrid.addLayout(&modifyManageablesButtonsStackedLayout, workingRow, 0, 1, 2);
     ++workingRow;
-}
-
-void AccountsWidget::updateManagingType(AccountManager::ManagingType managingType) {
-    managingTypeStackedLayout.setCurrentIndex(managingType);
-    modifyManageablesButtonsStackedLayout.setCurrentIndex(managingType);
 }
