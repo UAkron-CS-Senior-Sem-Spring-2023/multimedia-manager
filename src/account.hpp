@@ -16,6 +16,9 @@ class Account {
         virtual const Info& info() const;
 };
 
-class SourceAccount : public Account, public MessagingSource {};
-class RecipientAccount : public Account, public MessagingRecipient {};
-class DualAccount : public Account, public MessagingSource, public MessagingRecipient {};
+// accounts with sending capabilities
+class SourceAccount : public virtual Account, public MessagingSource {};
+// accounts that can have inboxes
+class RecipientAccount : public virtual Account, public MessagingRecipient {};
+// accounts with sending capabilities and inboxes
+class DualAccount : public SourceAccount, public RecipientAccount {};

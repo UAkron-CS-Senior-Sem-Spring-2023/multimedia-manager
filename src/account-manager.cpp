@@ -1,3 +1,50 @@
 #include "account-manager.hpp"
 
 AccountManager::ManagingType AccountManager::INITIAL_MANAGING_TYPE = ACCOUNTS;
+
+void AccountManager::addSourceAccount(std::unique_ptr<SourceAccount> sourceAccount) {
+    SourceAccount* sourceAccountPtr = sourceAccount.get();
+    accounts_.insert(sourceAccountPtr);
+    sourceAccounts_.insert(sourceAccountPtr);
+    accountsOwned.push_back(std::unique_ptr<Account>(std::move(sourceAccount)));
+    onAccountAdded(sourceAccountPtr);
+    onSourceAccountAdded(sourceAccountPtr);
+    onAccountsChanged(accounts_);
+    onSourceAccountsChanged(sourceAccounts_);
+}
+
+void AccountManager::addRecipientAccount(std::unique_ptr<RecipientAccount> recipientAccount) {
+    RecipientAccount* recipientAccountPtr = recipientAccount.get();
+    accounts_.insert(recipientAccountPtr);
+    recipientAccounts_.insert(recipientAccountPtr);
+    accountsOwned.push_back(std::unique_ptr<Account>(std::move(recipientAccount)));
+    onAccountAdded(recipientAccountPtr);
+    onRecipientAccountAdded(recipientAccountPtr);
+    onAccountsChanged(accounts_);
+    onRecipientAccountsChanged(recipientAccounts_);
+}
+
+void AccountManager::addDualAccount(std::unique_ptr<DualAccount> dualAccount) {
+    DualAccount* dualAccountPtr = dualAccount.get();
+    accounts_.insert(dualAccountPtr);
+    sourceAccounts_.insert(dualAccountPtr);
+    recipientAccounts_.insert(dualAccountPtr);
+    dualAccounts_.insert(dualAccountPtr);
+    accountsOwned.push_back(std::unique_ptr<Account>(std::move(dualAccount)));
+    onAccountAdded(dualAccountPtr);
+    onSourceAccountAdded(dualAccountPtr);
+    onRecipientAccountAdded(dualAccountPtr);
+    onDualAccountAdded(dualAccountPtr);
+    onAccountsChanged(accounts_);
+    onSourceAccountsChanged(sourceAccounts_);
+    onRecipientAccountsChanged(recipientAccounts_);
+    onDualAccountsChanged(dualAccounts_);
+}
+
+void AccountManager::addAccountGroup(std::unique_ptr<AccountGroup> accountGroup) {
+    AccountGroup* accountGroupPtr = accountGroup.get();
+    accountGroups_.insert(accountGroupPtr);
+    accountGroupsOwned.push_back(std::move(accountGroup));
+    onAccountGroupAdded(accountGroupPtr);
+    onAccountGroupsChanged(accountGroups_);
+}
