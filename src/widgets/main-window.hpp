@@ -18,7 +18,7 @@
 #include "accounts-widget.hpp"
 #include "account-info-widget.hpp"
 
-#include "../account-manager.hpp"
+#include "accounts/account-manager.hpp"
 
 class MainWindow : public QMainWindow {
     Q_OBJECT

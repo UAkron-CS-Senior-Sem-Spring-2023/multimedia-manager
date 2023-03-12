@@ -17,4 +17,6 @@ target_link_libraries(MultimediaManager
     PRIVATE curl
 )
 
+target_include_directories(MultimediaManager PUBLIC src)
+
 add_subdirectory(src)

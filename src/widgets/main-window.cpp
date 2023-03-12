@@ -1,6 +1,6 @@
 #include "main-window.hpp"
 
-#include "../account-manager.hpp"
+#include "accounts/account-manager.hpp"
 
 #include <QGuiApplication>
 #include <QScreen>
