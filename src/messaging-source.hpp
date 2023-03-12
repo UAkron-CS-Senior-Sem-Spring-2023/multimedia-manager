@@ -7,4 +7,4 @@ class MessagingSource {
         virtual ~MessagingSource() = default;
 
         virtual const Inbox& inbox() const;
-}
+};
