@@ -4,4 +4,4 @@ target_sources(MultimediaManager
     PUBLIC account-info-widget.cpp
 )
 
-add_subdirectory(add-account)
+add_subdirectory(add-account-wizard)

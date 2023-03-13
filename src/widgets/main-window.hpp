@@ -27,10 +27,21 @@ class MainWindow : public QMainWindow {
         MainWindow(QWidget* parent = nullptr);
 
         AccountManager& accountManager();
+        AddAccountWizard& addAccountWizard();
+
+        void changeSelectedAccount(const Account* account);
+        void changeSelectedAccountGroup(const AccountGroup* accountGroup);
+        const Account* selectedAccount() const;
+        const AccountGroup* selectedAccountGroup() const;
     signals:
         void onUpdateManagingType(AccountManager::ManagingType managingType);
+        void selectedAccountChanged(const Account* account);
+        void selectedAccountSourceRecipientTypeChanged(AccountManager::SourceRecipientType sourceRecipientType);
+        void selectedAccountGroupChanged(const AccountGroup* accountGroup);
+        void selectedAccountGroupSourceRecipientTypeChanged(AccountManager::SourceRecipientType sourceRecipientType);
     private:
         AccountManager accountManager_;
+        AddAccountWizard addAccountWizard_;
 
         QWidget windowWidget;
         QGridLayout windowGrid;

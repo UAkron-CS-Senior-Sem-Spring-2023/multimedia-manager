@@ -41,15 +41,25 @@ void GmailInbox::populate() {
 }
 
 GmailAccount::GmailAccount(std::string gmail, std::string oauthBearer)
-    : name_(gmail), gmail_(gmail), oauthBearer_(oauthBearer), inbox_(GmailInbox(this))
-{}
+    : name_(gmail), gmail_(gmail), oauthBearer_(oauthBearer), inbox_(GmailInbox(this)),
+    infoLayout(&infoWidget),
+    gmailInfoHeader("Gmail Information:"),
+    gmailCloneWithRecipientsButton("Create account from this with recipients")
+{
+    int workingRow = 0;
+    gmailGmailLabel.setText(QString::fromStdString(std::string("Gmail: ") + gmail_));
+    infoLayout.addWidget(&gmailInfoHeader, workingRow++, 0);
+    infoLayout.addWidget(&gmailGmailLabel, workingRow++, 0);
+    infoLayout.addWidget(&gmailCloneWithRecipientsButton, workingRow++, 0);
+    infoLayout.setRowStretch(workingRow, 1);
+}
 
 const std::string& GmailAccount::name() const {
     return name_;
 }
 
-const Account::Info& GmailAccount::info() const {
-    return info_;
+QWidget& GmailAccount::info() const {
+    return infoWidget;
 };
 
 const std::string& GmailAccount::gmail() const {

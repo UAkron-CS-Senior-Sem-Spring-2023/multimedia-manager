@@ -19,6 +19,13 @@ class AccountManager : public QObject {
         };
         static ManagingType INITIAL_MANAGING_TYPE;
 
+        enum SourceRecipientType {
+            SOURCE,
+            RECIPIENT,
+            DUAL,
+            NONE
+        };
+
         enum AccountVendor {
             GMAIL
         };
@@ -27,6 +34,8 @@ class AccountManager : public QObject {
         void addRecipientAccount(std::unique_ptr<RecipientAccount> recipientAccount);
         void addDualAccount(std::unique_ptr<DualAccount> dualAccount);
         void addAccountGroup(std::unique_ptr<AccountGroup> accountGroup);
+
+        SourceRecipientType accountSourceRecipientType(const Account* account) const;
 
     signals:
         void onAccountAdded(const Account* account);
@@ -41,6 +50,7 @@ class AccountManager : public QObject {
         void onAccountGroupsChanged(const std::unordered_set<AccountGroup*>& accountGroups);
     private:
         std::list<std::unique_ptr<Account>> accountsOwned;
+        std::unordered_map<const Account*, SourceRecipientType> accountSourceRecipientTypes_;
         std::unordered_set<Account*> accounts_;
         std::unordered_set<SourceAccount*> sourceAccounts_;
         std::unordered_set<RecipientAccount*> recipientAccounts_;

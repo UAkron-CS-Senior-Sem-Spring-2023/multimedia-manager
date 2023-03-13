@@ -30,12 +30,16 @@ class GmailInbox : public Inbox {
         std::vector<Request::MimeData> messages;
 };
 
+#include <QWidget>
+#include <QPushButton>
+#include <QGridLayout>
+
 class GmailAccount : public SourceAccount {
     public:
         GmailAccount(std::string gmail, std::string oauthBearer);
 
         const std::string& name() const;
-        const Account::Info& info() const;
+        QWidget& info() const;
 
         const std::string& gmail() const;
         const std::string& oauthBearer() const;
@@ -43,9 +47,15 @@ class GmailAccount : public SourceAccount {
         const GmailInbox& inbox() const;
     private:
         std::string name_;
-        Account::Info info_;
         std::string gmail_;
         std::string oauthBearer_;
 
         GmailInbox inbox_;
+
+        mutable QWidget infoWidget;
+        QGridLayout infoLayout;
+        QLabel gmailInfoHeader;
+        QLabel gmailGmailLabel;
+        QPushButton gmailCloneWithRecipientsButton;
+        
 };

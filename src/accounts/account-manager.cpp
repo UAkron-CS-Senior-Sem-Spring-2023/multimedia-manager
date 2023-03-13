@@ -5,6 +5,7 @@ AccountManager::ManagingType AccountManager::INITIAL_MANAGING_TYPE = ACCOUNTS;
 void AccountManager::addSourceAccount(std::unique_ptr<SourceAccount> sourceAccount) {
     SourceAccount* sourceAccountPtr = sourceAccount.get();
     accounts_.insert(sourceAccountPtr);
+    accountSourceRecipientTypes_[sourceAccountPtr] = SOURCE;
     sourceAccounts_.insert(sourceAccountPtr);
     accountsOwned.push_back(std::unique_ptr<Account>(std::move(sourceAccount)));
     onAccountAdded(sourceAccountPtr);
@@ -16,6 +17,7 @@ void AccountManager::addSourceAccount(std::unique_ptr<SourceAccount> sourceAccou
 void AccountManager::addRecipientAccount(std::unique_ptr<RecipientAccount> recipientAccount) {
     RecipientAccount* recipientAccountPtr = recipientAccount.get();
     accounts_.insert(recipientAccountPtr);
+    accountSourceRecipientTypes_[recipientAccountPtr] = RECIPIENT;
     recipientAccounts_.insert(recipientAccountPtr);
     accountsOwned.push_back(std::unique_ptr<Account>(std::move(recipientAccount)));
     onAccountAdded(recipientAccountPtr);
@@ -27,6 +29,7 @@ void AccountManager::addRecipientAccount(std::unique_ptr<RecipientAccount> recip
 void AccountManager::addDualAccount(std::unique_ptr<DualAccount> dualAccount) {
     DualAccount* dualAccountPtr = dualAccount.get();
     accounts_.insert(dualAccountPtr);
+    accountSourceRecipientTypes_[dualAccountPtr] = DUAL;
     sourceAccounts_.insert(dualAccountPtr);
     recipientAccounts_.insert(dualAccountPtr);
     dualAccounts_.insert(dualAccountPtr);
@@ -47,4 +50,8 @@ void AccountManager::addAccountGroup(std::unique_ptr<AccountGroup> accountGroup)
     accountGroupsOwned.push_back(std::move(accountGroup));
     onAccountGroupAdded(accountGroupPtr);
     onAccountGroupsChanged(accountGroups_);
+}
+
+AccountManager::SourceRecipientType AccountManager::accountSourceRecipientType(const Account* account) const {
+    return accountSourceRecipientTypes_.at(account);
 }

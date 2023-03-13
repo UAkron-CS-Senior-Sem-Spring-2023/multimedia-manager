@@ -9,19 +9,10 @@
 
 class Account {
     public:
-        class Info {
-            public:
-                virtual ~Info() = default;
-
-                virtual const std::vector<QLabel>& labels() const;
-            private:
-                static std::vector<QLabel> NO_LABELS;
-        };
-
         virtual ~Account() = default;
 
         virtual const std::string& name() const = 0;
-        virtual const Info& info() const = 0;
+        virtual QWidget& info() const = 0;
 };
 
 // accounts with sending capabilities

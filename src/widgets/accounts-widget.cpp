@@ -5,11 +5,10 @@
 AccountsWidget::AccountsWidget(MainWindow* mainWindow, QWidget* parent)
     : QWidget(parent),
     mainWindow(mainWindow),
-    addAccountWizard(&mainWindow->accountManager()),
     manageableGrid(QGridLayout(this)),
     managingAccountsLabel(QLabel(tr("Managed Accounts"))),
     managingAccountGroupsLabel(QLabel(tr("Managed Account Groups"))),
-    manageableNamesLayout(QVBoxLayout(&manageableNamesWidget)),
+    accountNamesLayout(QGridLayout(&accountNamesWidget)),
     modifyManageableAccountLayout(QHBoxLayout(&modifyManageableAccountWidget)),
     addManageableAccountButton(QPushButton(tr("Add Account"))),
     removeManageableAccountButton(QPushButton(tr("Remove Account"))),
@@ -28,16 +27,49 @@ AccountsWidget::AccountsWidget(MainWindow* mainWindow, QWidget* parent)
     manageableGrid.addLayout(&managingTypeStackedLayout, workingRow++, 0);
 
     // set up manageable list
-    manageableNamesWidget.setBackgroundRole(QPalette::Base);
-    manageableNamesWidget.setAutoFillBackground(true);
-    manageableNamesLayout.setContentsMargins(0, 0, 0, 16);
-    connect(&mainWindow->accountManager(), &AccountManager::onAccountAdded, [this](const Account* account){
-        manageableNames.push_back(std::make_unique<QLabel>(QString::fromStdString(account->name())));
-        manageableNamesLayout.addWidget(manageableNames.back().get());
+    accountNamesWidget.setBackgroundRole(QPalette::Base);
+    accountNamesWidget.setAutoFillBackground(true);
+    connect(&mainWindow->accountManager(), &AccountManager::onAccountsChanged, [this](const std::unordered_set<Account*> accounts) {
+        for (auto& widget : accountNames) {
+            accountNamesLayout.removeWidget(widget.get());
+        }
+        accountNames.clear();
+        
+        int workingRow = 0;
+        for (const auto* account : accounts) {
+            accountNames.push_back(std::make_unique<QPushButton>(QString::fromStdString(account->name())));
+            accountNamesLayout.addWidget(accountNames.back().get(), workingRow++, 0);
+            connect(accountNames.back().get(), &QPushButton::clicked, [this, account](){
+                this->mainWindow->changeSelectedAccount(account);
+            });
+        }
+        accountNamesLayout.setRowStretch(workingRow, 1);
     });
+    namesStackedLayout.insertWidget(AccountManager::ACCOUNTS, &accountNamesWidget);
+
+    accountGroupNamesWidget.setBackgroundRole(QPalette::Base);
+    accountGroupNamesWidget.setAutoFillBackground(true);
+    connect(&mainWindow->accountManager(), &AccountManager::onAccountGroupsChanged, [this](const std::unordered_set<AccountGroup*> accountGroups) {
+        for (auto& widget : accountGroupNames) {
+            accountGroupNamesLayout.removeWidget(widget.get());
+        }
+        accountGroupNames.clear();
+        
+        int workingRow = 0;
+        for (const auto* accountGroup : accountGroups) {
+            accountGroupNames.push_back(std::make_unique<QPushButton>(QString::fromStdString(accountGroup->name())));
+            accountGroupNamesLayout.addWidget(accountGroupNames.back().get(), workingRow++, 0);
+            connect(accountNames.back().get(), &QPushButton::clicked, [this, accountGroup](){
+                this->mainWindow->changeSelectedAccountGroup(accountGroup);
+            });
+        }
+        accountGroupNamesLayout.setRowStretch(workingRow, 1);
+    });
+    namesStackedLayout.insertWidget(AccountManager::ACCOUNT_GROUPS, &accountGroupNamesWidget);
 
     manageableGrid.setRowStretch(workingRow, 1);
-    manageableGrid.addWidget(&manageableNamesWidget, workingRow++, 0, 1, 2);
+    connect(mainWindow, &MainWindow::onUpdateManagingType, &namesStackedLayout, &QStackedLayout::setCurrentIndex);
+    manageableGrid.addLayout(&namesStackedLayout, workingRow++, 0, 1, 2);
 
     // set up buttons to modify accounts
     modifyManageableAccountLayout.addWidget(&addManageableAccountButton);
@@ -57,5 +89,5 @@ AccountsWidget::AccountsWidget(MainWindow* mainWindow, QWidget* parent)
 }
 
 void AccountsWidget::addAccountClicked() {
-    addAccountWizard.show();
+    mainWindow->addAccountWizard().show();
 }

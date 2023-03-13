@@ -11,7 +11,7 @@
 
 #include <vector>
 
-#include "add-account/add-account-wizard.hpp"
+#include "add-account-wizard/add-account-wizard.hpp"
 
 class MainWindow;
 
@@ -27,9 +27,15 @@ class AccountsWidget : public QWidget {
         QLabel managingAccountsLabel;
         QLabel managingAccountGroupsLabel;
 
-        QWidget manageableNamesWidget;
-        QVBoxLayout manageableNamesLayout;
-        std::vector<std::unique_ptr<QLabel>> manageableNames;
+        QStackedLayout namesStackedLayout;
+
+        QWidget accountNamesWidget;
+        QGridLayout accountNamesLayout;
+        std::vector<std::unique_ptr<QPushButton>> accountNames;
+
+        QWidget accountGroupNamesWidget;
+        QGridLayout accountGroupNamesLayout;
+        std::vector<std::unique_ptr<QPushButton>> accountGroupNames;
 
         QStackedLayout modifyManageablesButtonsStackedLayout;
 
@@ -44,5 +50,4 @@ class AccountsWidget : public QWidget {
         QPushButton removeManageableAccountGroupButton;
 
         void addAccountClicked();
-        AddAccountWizard addAccountWizard;
 };
