@@ -5,6 +5,8 @@
 #include <QGuiApplication>
 #include <QScreen>
 
+#include "get-email-recipients-wizard.hpp"
+
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent),
     windowGrid(QGridLayout(&windowWidget)),

@@ -7,9 +7,9 @@
 #include <QPushButton>
 #include <QGridLayout>
 
-class GmailAccountWithRecipients : public GmailAccount, public DualAccount {
+class GmailAccountWithRecipients : public DualAccount, public GmailAccount {
     public:
-        GmailAccountWithRecipients(const GmailAccount& gmailAccount, std::list<std::string> recipients, QWidget* parent = nullptr);
+        GmailAccountWithRecipients(const GmailAccount& gmailAccount, std::list<std::string> recipients, QObject* parent = nullptr);
 
         const std::string& name() const;
 

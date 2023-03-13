@@ -43,8 +43,8 @@ void GmailInbox::populate() {
 
 }
 
-GmailAccount::GmailAccount(std::string gmail, std::string oauthBearer, QWidget* parent)
-    : name_(gmail), gmail_(gmail), oauthBearer_(oauthBearer), inbox_(GmailInbox(this)), QObject(parent),
+GmailAccount::GmailAccount(std::string gmail, std::string oauthBearer, QObject* parent)
+    : QObject(parent), name_(gmail), gmail_(gmail), oauthBearer_(oauthBearer), inbox_(GmailInbox(this)), 
     infoLayout(&infoWidget),
     gmailInfoHeader("Gmail Information:"),
     gmailCloneWithRecipientsButton("Create account from this with recipients")
@@ -53,14 +53,18 @@ GmailAccount::GmailAccount(std::string gmail, std::string oauthBearer, QWidget* 
     gmailGmailLabel.setText(QString::fromStdString(std::string("Gmail: ") + gmail_));
     infoLayout.addWidget(&gmailInfoHeader, workingRow++, 0);
     infoLayout.addWidget(&gmailGmailLabel, workingRow++, 0);
-    connect(&gmailCloneWithRecipientsButton, &QPushButton::clicked, [this](){
-        connect(&getEmailRecipients, &GetEmailRecipientsWizard::gotEmailRecipients, [this](std::list<std::string> recipients){
+
+    connect(&gmailCloneWithRecipientsButton, &QPushButton::clicked, [this]() {
+        if (!getEmailRecipientsWizard) {
+            getEmailRecipientsWizard = std::make_unique<GetEmailRecipientsWizard>();
+        }
+        connect(getEmailRecipientsWizard.get(), &GetEmailRecipientsWizard::gotEmailRecipients, [this](std::list<std::string> recipients){
             if (recipients.size() != 0) {
                 AccountManager::singleton().addDualAccount(std::make_unique<GmailAccountWithRecipients>(*this, std::move(recipients)));
             }
-            disconnect(&getEmailRecipients, &GetEmailRecipientsWizard::gotEmailRecipients, nullptr, nullptr);
+            disconnect(getEmailRecipientsWizard.get(), &GetEmailRecipientsWizard::gotEmailRecipients, nullptr, nullptr);
         });
-        getEmailRecipients.show();
+        getEmailRecipientsWizard->show();
     });
     infoLayout.addWidget(&gmailCloneWithRecipientsButton, workingRow++, 0);
     infoLayout.setRowStretch(workingRow, 1);

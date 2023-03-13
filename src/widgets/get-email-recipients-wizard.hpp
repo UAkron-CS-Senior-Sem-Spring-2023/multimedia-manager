@@ -11,6 +11,8 @@
 #include <QLineEdit>
 #include <QPushButton>
 
+#include <iostream>
+
 class GetEmailRecipientsWizard : public QWizard {
     Q_OBJECT
 
@@ -19,18 +21,6 @@ class GetEmailRecipientsWizard : public QWizard {
     signals:
         void gotEmailRecipients(std::list<std::string> emailRecipients);
     private:
-        QWizardPage getRecipientsWizardPage;
-        QGridLayout getRecipientsLayout;
-        QLabel explanationLabel;
-        QLabel recipientRemovalLabel;
-        QWidget recipientRemovalButtonsWidget;
-        QScrollArea recipientRemovalButtonsScrollArea;
-        QGridLayout recipientRemovalButtonsLayout;
-        std::list<std::pair<std::size_t, std::unique_ptr<QPushButton>>> recipientRemovalButtons;
+        std::list<std::pair<std::size_t, QPushButton*>> recipientRemovalButtons;
         std::unordered_set<std::string> recipientsAccountedFor;
-        QLabel recipientEnteringLabel;
-        QLineEdit recipientEnteringTextLine;
-        QPushButton recipientEnteringButton;
-
-        std::size_t uniqueIdentifier = 0;
 };
