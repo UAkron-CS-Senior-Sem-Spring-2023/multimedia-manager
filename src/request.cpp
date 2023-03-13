@@ -29,19 +29,36 @@ std::size_t Request::handleDataStatic(void* buffer, std::size_t size, std::size_
     return Request::singleton().handleData(buffer, size, bufferLength, userData);
 }
 
-std::optional<std::string> Request::get(const std::string& url) {
+std::string* Request::get(const std::string& url) {
     return singleton().getImpl(url);
 }
-
-std::optional<std::string> Request::getImpl(const std::string& url) {
+std::string* Request::getImpl(const std::string& url) {
     data.clear();
     curl_easy_setopt(handle, CURLOPT_URL, url.c_str());
     curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, handleDataStatic);
     auto status = curl_easy_perform(handle);
     if (status != CURLE_OK) {
-        return std::optional<std::string>();
+        return nullptr;
     } else {
-        return std::optional<std::string>(std::string(std::move(data)));
+        return &data;
+    }
+}
+
+std::string* Request::authGet(const std::string& url, const std::string& oauthBearer) {
+    return singleton().authGetImpl(url, oauthBearer);
+}
+std::string* Request::authGetImpl(const std::string& url, const std::string& oauthBearer) {
+    data.clear();
+    curl_easy_setopt(handle, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(handle, CURLOPT_XOAUTH2_BEARER, oauthBearer.c_str());
+    curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, handleDataStatic);
+    curl_easy_setopt(handle, CURLOPT_HTTPAUTH, CURLAUTH_BEARER);
+    curl_easy_setopt(handle, CURLOPT_USE_SSL, CURLUSESSL_ALL);
+    auto status = curl_easy_perform(handle);
+    if (status != CURLE_OK) {
+        return nullptr;
+    } else {
+        return &data;
     }
 }
 
@@ -58,11 +75,10 @@ std::string Request::postifyMappedValues(const std::unordered_map<std::string, s
     return postStr;
 }
 
-std::optional<std::string> Request::post(const std::string& url, const std::unordered_map<std::string, std::string>& postFields) {
+std::string* Request::post(const std::string& url, const std::unordered_map<std::string, std::string>& postFields) {
     return singleton().postImpl(url, postFields);
 }
-
-std::optional<std::string> Request::postImpl(const std::string& url, const std::unordered_map<std::string, std::string>& postFields) {
+std::string* Request::postImpl(const std::string& url, const std::unordered_map<std::string, std::string>& postFields) {
     data.clear();
     curl_easy_setopt(handle, CURLOPT_URL, url.c_str());
     curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, handleDataStatic);
@@ -70,13 +86,13 @@ std::optional<std::string> Request::postImpl(const std::string& url, const std::
 
     auto status = curl_easy_perform(handle);
     if (status != CURLE_OK) {
-        return std::optional<std::string>();
+        return nullptr;
     } else {
-        return std::optional<std::string>(std::string(std::move(data)));
+        return &data;
     }
 }
 
-std::optional<std::string> Request::smtp(
+std::string* Request::smtp(
     const std::string& url,
     const std::string& oauthBearer,
     const SMTPHeaders& headers,
@@ -84,8 +100,7 @@ std::optional<std::string> Request::smtp(
 ) {
     return singleton().smtpImpl(url, oauthBearer, headers, mimeData);
 }
-
-std::optional<std::string> Request::smtpImpl(
+std::string* Request::smtpImpl(
     const std::string& url,
     const std::string& oauthBearer,
     const SMTPHeaders& headers,
@@ -104,17 +119,16 @@ std::optional<std::string> Request::smtpImpl(
 
     auto status = curl_easy_perform(handle);
     if (status != CURLE_OK) {
-        return std::optional<std::string>();
+        return nullptr;
     } else {
-        return std::optional<std::string>(std::string(std::move(data)));
+        return &data;
     }
 }
 
-std::optional<std::string> Request::imap(const std::string& url, const std::string& username, const std::string& oauthBearer) {
+std::string* Request::imap(const std::string& url, const std::string& username, const std::string& oauthBearer) {
     return singleton().imapImpl(url, username, oauthBearer);
 }
-
-std::optional<std::string> Request::imapImpl(const std::string& url, const std::string& username, const std::string& oauthBearer) {
+std::string* Request::imapImpl(const std::string& url, const std::string& username, const std::string& oauthBearer) {
     curl_easy_setopt(handle, CURLOPT_URL, url.c_str());
     curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, handleDataStatic);
     curl_easy_setopt(handle, CURLOPT_USERNAME, username.c_str());
@@ -122,9 +136,9 @@ std::optional<std::string> Request::imapImpl(const std::string& url, const std::
 
     auto status = curl_easy_perform(handle);
     if (status != CURLE_OK) {
-        return std::optional<std::string>();
+        return nullptr;
     } else {
-        return std::optional<std::string>(std::string(std::move(data)));
+        return &data;
     }
 }
 

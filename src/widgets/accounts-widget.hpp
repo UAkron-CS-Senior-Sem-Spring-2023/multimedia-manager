@@ -11,11 +11,13 @@
 
 #include <vector>
 
+#include "add-account/add-account-wizard.hpp"
+
 class MainWindow;
 
 class AccountsWidget : public QWidget {
     public:
-        AccountsWidget(MainWindow* accountManager, QWidget* parent = nullptr);
+        AccountsWidget(MainWindow* mainWindow, QWidget* parent = nullptr);
     private:
         MainWindow* mainWindow;
 
@@ -27,7 +29,7 @@ class AccountsWidget : public QWidget {
 
         QWidget manageableNamesWidget;
         QVBoxLayout manageableNamesLayout;
-        std::vector<QLabel> manageableNames;
+        std::vector<std::unique_ptr<QLabel>> manageableNames;
 
         QStackedLayout modifyManageablesButtonsStackedLayout;
 
@@ -40,4 +42,7 @@ class AccountsWidget : public QWidget {
         QHBoxLayout modifyManageableAccountGroupLayout;
         QPushButton addManageableAccountGroupButton;
         QPushButton removeManageableAccountGroupButton;
+
+        void addAccountClicked();
+        AddAccountWizard addAccountWizard;
 };

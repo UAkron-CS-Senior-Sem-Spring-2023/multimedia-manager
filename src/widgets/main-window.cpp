@@ -4,7 +4,6 @@
 
 #include <QGuiApplication>
 #include <QScreen>
-#include <QPalette>
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent),
@@ -34,10 +33,14 @@ MainWindow::MainWindow(QWidget* parent)
     setCentralWidget(&windowWidget);
 }
 
+AccountManager& MainWindow::accountManager() {
+    return accountManager_;
+}
+
 void MainWindow::manageableAccountsButtonClicked() {
-    onUpdateManagingType(AccountManager::ACCOUNTS);
+    emit onUpdateManagingType(AccountManager::ACCOUNTS);
 }
 
 void MainWindow::manageableAccountGroupsButtonClicked() {
-    onUpdateManagingType(AccountManager::ACCOUNT_GROUPS);
+    emit onUpdateManagingType(AccountManager::ACCOUNT_GROUPS);
 }

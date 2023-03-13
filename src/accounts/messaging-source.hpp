@@ -6,5 +6,5 @@ class MessagingSource {
     public:
         virtual ~MessagingSource() = default;
 
-        virtual const Inbox& inbox() const;
+        virtual const Inbox& inbox() const = 0;
 };

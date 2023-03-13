@@ -19,14 +19,14 @@ class Inbox {
                 using const_reference = const Request::MimeData&;
 
                 virtual const_reference operator*() const = 0;
-                virtual iterator& operator++();
-                virtual iterator operator++(int);
-                virtual bool operator==(const iterator& other) const;
-                virtual bool operator!=(const iterator& other) const;
+                virtual iterator& operator++() = 0;
+                virtual std::unique_ptr<iterator> operator++(int) = 0;
+                virtual bool operator==(const iterator& other) const = 0;
+                virtual bool operator!=(const iterator& other) const = 0;
         };
 
-        virtual iterator begin() const;
-        virtual iterator cbegin() const;
-        virtual iterator end() const;
-        virtual iterator cend() const;
+        virtual std::unique_ptr<iterator> begin() const = 0;
+        virtual std::unique_ptr<iterator> end() const = 0;
+
+        virtual void populate() = 0;
 };

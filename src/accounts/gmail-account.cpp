@@ -1,0 +1,65 @@
+#include "gmail-account.hpp"
+
+GmailInbox::GmailInbox(GmailAccount* account)
+    : account(account)
+{}
+
+GmailInbox::iterator::iterator(typename std::vector<Request::MimeData>::const_iterator messageIterator)
+    : messageIterator(messageIterator)
+{}
+
+Inbox::iterator& GmailInbox::iterator::operator++() {
+    ++messageIterator;
+    return *this;
+}
+std::unique_ptr<Inbox::iterator> GmailInbox::iterator::operator++(int) {
+    auto iterator = std::unique_ptr<Inbox::iterator>(new GmailInbox::iterator(messageIterator));
+    ++messageIterator;
+    return std::move(iterator);
+}
+
+typename Inbox::iterator::const_reference GmailInbox::iterator::operator*() const {
+    return *messageIterator;
+}
+
+bool GmailInbox::iterator::operator==(const Inbox::iterator& other) const {
+    return messageIterator == dynamic_cast<const GmailInbox::iterator&>(other).messageIterator;
+}
+bool GmailInbox::iterator::operator!=(const Inbox::iterator& other) const {
+    return messageIterator != dynamic_cast<const GmailInbox::iterator&>(other).messageIterator;
+}
+
+std::unique_ptr<Inbox::iterator> GmailInbox::begin() const {
+    return std::unique_ptr<Inbox::iterator>(new GmailInbox::iterator(messages.begin()));
+}
+std::unique_ptr<Inbox::iterator> GmailInbox::end() const {
+    return std::unique_ptr<Inbox::iterator>(new GmailInbox::iterator(messages.end()));
+}
+
+void GmailInbox::populate() {
+
+}
+
+GmailAccount::GmailAccount(std::string gmail, std::string oauthBearer)
+    : name_(gmail), gmail_(gmail), oauthBearer_(oauthBearer), inbox_(GmailInbox(this))
+{}
+
+const std::string& GmailAccount::name() const {
+    return name_;
+}
+
+const Account::Info& GmailAccount::info() const {
+    return info_;
+};
+
+const std::string& GmailAccount::gmail() const {
+    return gmail_;
+}
+
+const std::string& GmailAccount::oauthBearer() const {
+    return oauthBearer_;
+}
+
+const GmailInbox& GmailAccount::inbox() const {
+    return inbox_;
+}

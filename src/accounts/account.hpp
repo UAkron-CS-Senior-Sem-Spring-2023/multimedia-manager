@@ -1,19 +1,27 @@
 #pragma once
 
+#include <vector>
+
+#include <QLabel>
+
 #include "messaging-source.hpp"
 #include "messaging-recipient.hpp"
 
 class Account {
-    class Info {
-        public:
-            virtual ~Info() = default;
-    };
-    
     public:
+        class Info {
+            public:
+                virtual ~Info() = default;
+
+                virtual const std::vector<QLabel>& labels() const;
+            private:
+                static std::vector<QLabel> NO_LABELS;
+        };
+
         virtual ~Account() = default;
 
-        virtual const std::string& name() const;
-        virtual const Info& info() const;
+        virtual const std::string& name() const = 0;
+        virtual const Info& info() const = 0;
 };
 
 // accounts with sending capabilities

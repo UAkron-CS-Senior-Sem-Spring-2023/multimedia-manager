@@ -18,8 +18,7 @@ AccountInfoWidget::AccountInfoWidget(MainWindow* mainWindow, QWidget* parent)
     managingTypeInfoStackedLayout.insertWidget(AccountManager::ACCOUNTS, &managingAccountsInfoLabel);
     managingTypeInfoStackedLayout.insertWidget(AccountManager::ACCOUNT_GROUPS, &managingAccountGroupsInfoLabel);
     managingTypeInfoStackedLayout.setCurrentIndex(AccountManager::INITIAL_MANAGING_TYPE);
-    managingGrid.addLayout(&managingTypeInfoStackedLayout, workingRow, 0);
-    ++workingRow;
+    managingGrid.addLayout(&managingTypeInfoStackedLayout, workingRow++, 0);
     connect(mainWindow, &MainWindow::onUpdateManagingType, &managingTypeInfoStackedLayout, &QStackedLayout::setCurrentIndex);
 
     // set up managed accounts info
@@ -28,8 +27,7 @@ AccountInfoWidget::AccountInfoWidget(MainWindow* mainWindow, QWidget* parent)
     managingInfoLayout.setContentsMargins(0, 0, 0, 16);
 
     managingGrid.setRowStretch(workingRow, 1);
-    managingGrid.addWidget(&managingInfoWidget, workingRow, 0);
-    ++workingRow;
+    managingGrid.addWidget(&managingInfoWidget, workingRow++, 0);
 
     // set up actionable buttons for that account
 
@@ -37,6 +35,5 @@ AccountInfoWidget::AccountInfoWidget(MainWindow* mainWindow, QWidget* parent)
     managingActionButtonsLayout.addStretch(1);
     managingActionButtonsLayout.addWidget(&managingViewInboxButton);
 
-    managingGrid.addLayout(&managingActionButtonsLayout, workingRow, 0);
-    ++workingRow;
+    managingGrid.addLayout(&managingActionButtonsLayout, workingRow++, 0);
 }

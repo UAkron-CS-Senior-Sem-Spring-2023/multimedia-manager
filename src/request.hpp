@@ -50,27 +50,29 @@ class Request {
         };
 
 
-        static std::optional<std::string> get(const std::string& url);
-        static std::optional<std::string> post(const std::string& url, const std::unordered_map<std::string, std::string>& postFields);
+        static std::string* get(const std::string& url);
+        static std::string* authGet(const std::string& url, const std::string& oauthBearer);
+        static std::string* post(const std::string& url, const std::unordered_map<std::string, std::string>& postFields);
         template <class PostFieldIterable>
-        static std::optional<std::string> post(const std::string& url, const PostFieldIterable& postFieldss) {
+        static std::string* post(const std::string& url, const PostFieldIterable& postFieldss) {
             return singleton().postImpl(url, postFieldss);
         }
         
-        static std::optional<std::string> smtp(
+        static std::string* smtp(
             const std::string& url,
             const std::string& oauthBearer,
             const SMTPHeaders& headers,
             const MimeData& mimeData
         );
 
-        static std::optional<std::string> imap(const std::string& url, const std::string& username, const std::string& oauthBearer);
+        static std::string* imap(const std::string& url, const std::string& username, const std::string& oauthBearer);
     private:
-        std::optional<std::string> getImpl(const std::string& url);
+        std::string* getImpl(const std::string& url);
+        std::string* authGetImpl(const std::string& url, const std::string& oauthBearer);
         std::string postifyMappedValues(const std::unordered_map<std::string, std::string>& postFields);
-        std::optional<std::string> postImpl(const std::string& url, const std::unordered_map<std::string, std::string>& postFields);
+        std::string* postImpl(const std::string& url, const std::unordered_map<std::string, std::string>& postFields);
         template <class PostFieldIterable>
-        std::optional<std::string> postImpl(const std::string& url, const PostFieldIterable& postFieldss) {
+        std::string* postImpl(const std::string& url, const PostFieldIterable& postFieldss) {
             data.clear();
             curl_easy_setopt(handle, CURLOPT_URL, url.c_str());
             curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, handleDataStatic);
@@ -88,20 +90,20 @@ class Request {
 
             auto status = curl_easy_perform(handle);
             if (status != CURLE_OK) {
-                return std::optional<std::string>();
+                return nullptr;
             } else {
-                return std::optional<std::string>(std::string(std::move(data)));
+                return &data;
             }
         }
         
-        std::optional<std::string> smtpImpl(
+        std::string* smtpImpl(
             const std::string& url,
             const std::string& oauthBearer,
             const SMTPHeaders& headers,
             const MimeData& mimeData
         );
 
-        std::optional<std::string> imapImpl(const std::string& url, const std::string& username, const std::string& oauthBearer);
+        std::string* imapImpl(const std::string& url, const std::string& username, const std::string& oauthBearer);
 
         static Request& singleton();
 

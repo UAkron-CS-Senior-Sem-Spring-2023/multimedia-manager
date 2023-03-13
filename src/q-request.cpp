@@ -9,6 +9,9 @@
 #include <QDesktopServices>
 #include <QTimer>
 
+#include <nlohmann/json.hpp>
+using json = nlohmann::json;
+
 std::unique_ptr<QRequest> singleton_;
 QRequest& QRequest::singleton() {
     if (!singleton_) {
@@ -18,16 +21,23 @@ QRequest& QRequest::singleton() {
     return *singleton_;
 }
 
+std::size_t QRequest::getUniqueRequest() {
+    return request_++;
+}
+
 QRequest::QRequest(QObject* parent)
     : QObject(parent)
 {}
 
 void QRequest::get(std::size_t request, const std::string& url) {
-    emit onResponse(request, std::move(Request::get(url)));
+    emit onResponse(request, Request::get(url));
+}
+void QRequest::authGet(std::size_t request, const std::string& url, const std::string& oauthBearer) {
+    emit onResponse(request, Request::authGet(url, oauthBearer));
 }
 
 void QRequest::post(std::size_t request, const std::string& url, const std::unordered_map<std::string, std::string>& postFields) {
-    emit onResponse(request, std::move(Request::post(url, postFields)));
+    emit onResponse(request, Request::post(url, postFields));
 }
 
 void QRequest::smtp(
@@ -37,23 +47,50 @@ void QRequest::smtp(
     const SMTPHeaders& headers,
     const MimeData& mimeData
 ) {
-    emit onResponse(request, std::move(Request::smtp(url, oauthBearer, headers, mimeData)));
+    emit onResponse(request, Request::smtp(url, oauthBearer, headers, mimeData));
 }
 
-void QRequest::gmailSMTP(
+void QRequest::gmailGetUser(
     std::size_t request,
-    const SMTPHeaders& headers,
-    const MimeData& mimeData
+    const std::string& oauthBearer
 ) {
+    std::string* response = Request::authGet("https://gmail.googleapis.com/gmail/v1/users/me/profile", oauthBearer);
+    if (response == nullptr) {
+        emit onResponse(request, nullptr);
+        return;
+    }
+
+    json jsonResponse = json::parse(*response);
+    if (!jsonResponse.contains("emailAddress")) {
+        emit onResponse(request, nullptr);
+    }
+    emit onResponse(request, new std::string(jsonResponse.at("emailAddress")));
+}
+
+void QRequest::gmailOAuth(std::size_t request) {
     // this actually must be new, if otherwise it will go out of scope
-    auto googleOAuth = new QOAuth2AuthorizationCodeFlow(this);
+    auto* timeoutOAuth = new QTimer();
+
+    auto* googleOAuth = new QOAuth2AuthorizationCodeFlow(this);
     googleOAuth->setScope("https://mail.google.com/");
 
-    auto replyHandler = new QOAuthHttpServerReplyHandler(20289, this);
+    auto* replyHandler = new QOAuthHttpServerReplyHandler(20289, this);
+
+    auto disconnectAll = [googleOAuth, replyHandler, timeoutOAuth]() {
+        disconnect(googleOAuth, nullptr, nullptr, nullptr);
+        disconnect(replyHandler, nullptr, nullptr, nullptr);
+        disconnect(timeoutOAuth, nullptr, nullptr, nullptr);
+        delete googleOAuth;
+        delete replyHandler;
+        delete timeoutOAuth;
+    };
+
     connect(googleOAuth, &QOAuth2AuthorizationCodeFlow::authorizeWithBrowser, &QDesktopServices::openUrl);
-    connect(googleOAuth, &QOAuth2AuthorizationCodeFlow::granted, [this, &headers, &mimeData, request, googleOAuth, replyHandler](){
-        auto authBearer_ = googleOAuth->token().toStdString();
-        emit onResponse(request, std::move(Request::smtp("smtp://smtp.gmail.com:587", authBearer_, headers, mimeData)));
+    connect(googleOAuth, &QOAuth2AuthorizationCodeFlow::granted, [this, request, googleOAuth, disconnectAll]() {
+        std::string* oauthToken = new std::string(googleOAuth->token().toStdString());
+        emit onResponse(request, oauthToken);
+
+        disconnectAll();
     });
 
     const QString CLIENT_ID = "358961584307-33g6eh5pqrr5t7snk8ta9qqejmtmt8kp.apps.googleusercontent.com";
@@ -78,16 +115,21 @@ void QRequest::gmailSMTP(
     googleOAuth->setReplyHandler(replyHandler);
     googleOAuth->grant();
 
-    auto* timeoutOAuth = new QTimer();
     timeoutOAuth->setSingleShot(true);
-    connect(timeoutOAuth, &QTimer::timeout, [googleOAuth, replyHandler, timeoutOAuth](){
-        disconnect(googleOAuth, nullptr, nullptr, nullptr);
-        disconnect(replyHandler, nullptr, nullptr, nullptr);
-        disconnect(timeoutOAuth, nullptr, nullptr, nullptr);
-        delete googleOAuth;
-        delete replyHandler;
-        delete timeoutOAuth;
+    connect(timeoutOAuth, &QTimer::timeout, [this, request, disconnectAll](){
+        emit onResponse(request, nullptr);
+
+        disconnectAll();
     });
     // 5 minute time to authenticate
     timeoutOAuth->start(300000);
+}
+
+void QRequest::gmailSMTP(
+    std::size_t request,
+    const std::string& oauthBearer,
+    const SMTPHeaders& headers,
+    const MimeData& mimeData
+) {
+    emit onResponse(request, Request::smtp("smtp://smtp.gmail.com:587", oauthBearer, headers, mimeData));
 }

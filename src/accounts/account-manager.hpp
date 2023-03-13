@@ -19,6 +19,10 @@ class AccountManager : public QObject {
         };
         static ManagingType INITIAL_MANAGING_TYPE;
 
+        enum AccountVendor {
+            GMAIL
+        };
+
         void addSourceAccount(std::unique_ptr<SourceAccount> sourceAccount);
         void addRecipientAccount(std::unique_ptr<RecipientAccount> recipientAccount);
         void addDualAccount(std::unique_ptr<DualAccount> dualAccount);

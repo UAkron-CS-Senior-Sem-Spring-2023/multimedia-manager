@@ -25,10 +25,12 @@ class MainWindow : public QMainWindow {
 
     public:
         MainWindow(QWidget* parent = nullptr);
+
+        AccountManager& accountManager();
     signals:
         void onUpdateManagingType(AccountManager::ManagingType managingType);
     private:
-        AccountManager accountManager;
+        AccountManager accountManager_;
 
         QWidget windowWidget;
         QGridLayout windowGrid;
