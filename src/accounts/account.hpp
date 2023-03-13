@@ -16,8 +16,8 @@ class Account {
 };
 
 // accounts with sending capabilities
-class SourceAccount : public virtual Account, public MessagingSource {};
+class SourceAccount : public virtual Account, public virtual MessagingSource {};
 // accounts that can have inboxes
-class RecipientAccount : public virtual Account, public MessagingRecipient {};
+class RecipientAccount : public virtual Account, public virtual MessagingRecipient {};
 // accounts with sending capabilities and inboxes
 class DualAccount : public SourceAccount, public RecipientAccount {};

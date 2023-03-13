@@ -15,7 +15,7 @@ class AddAccountWizard : public QWizard {
     Q_OBJECT
     
     public:
-        AddAccountWizard(AccountManager* accountManager, QWidget* parent = nullptr);
+        AddAccountWizard(QWidget* parent = nullptr);
 
         struct AccountSpecificPageInfo {
             std::unique_ptr<QRadioButton> radioButton;
@@ -34,8 +34,6 @@ class AddAccountWizard : public QWizard {
     signals:
         void vendorSelectionChanged(AccountManager::AccountVendor vendor);
     private:
-        AccountManager* accountManager;
-
         AccountTypeSelectionWizardPage accountTypeSelectionWizardPage;
         AddAccountVendorWizardPage addAccountVendorWizardPage;
 

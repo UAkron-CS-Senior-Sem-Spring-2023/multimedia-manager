@@ -29,7 +29,7 @@ AccountsWidget::AccountsWidget(MainWindow* mainWindow, QWidget* parent)
     // set up manageable list
     accountNamesWidget.setBackgroundRole(QPalette::Base);
     accountNamesWidget.setAutoFillBackground(true);
-    connect(&mainWindow->accountManager(), &AccountManager::onAccountsChanged, [this](const std::unordered_set<Account*> accounts) {
+    connect(&AccountManager::singleton(), &AccountManager::onAccountsChanged, [this](const std::unordered_set<Account*> accounts) {
         for (auto& widget : accountNames) {
             accountNamesLayout.removeWidget(widget.get());
         }
@@ -49,7 +49,7 @@ AccountsWidget::AccountsWidget(MainWindow* mainWindow, QWidget* parent)
 
     accountGroupNamesWidget.setBackgroundRole(QPalette::Base);
     accountGroupNamesWidget.setAutoFillBackground(true);
-    connect(&mainWindow->accountManager(), &AccountManager::onAccountGroupsChanged, [this](const std::unordered_set<AccountGroup*> accountGroups) {
+    connect(&AccountManager::singleton(), &AccountManager::onAccountGroupsChanged, [this](const std::unordered_set<AccountGroup*> accountGroups) {
         for (auto& widget : accountGroupNames) {
             accountGroupNamesLayout.removeWidget(widget.get());
         }

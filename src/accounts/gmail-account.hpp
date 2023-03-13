@@ -34,17 +34,19 @@ class GmailInbox : public Inbox {
 #include <QPushButton>
 #include <QGridLayout>
 
-class GmailAccount : public SourceAccount {
-    public:
-        GmailAccount(std::string gmail, std::string oauthBearer);
+#include "widgets/get-email-recipients-wizard.hpp"
 
-        const std::string& name() const;
-        QWidget& info() const;
+class GmailAccount : public virtual SourceAccount, public QObject {
+    public:
+        GmailAccount(std::string gmail, std::string oauthBearer, QWidget* parent = nullptr);
+
+        const std::string& name() const override;
+        QWidget& info() const override;
+        const GmailInbox& inbox() const override;
 
         const std::string& gmail() const;
         const std::string& oauthBearer() const;
 
-        const GmailInbox& inbox() const;
     private:
         std::string name_;
         std::string gmail_;
@@ -57,5 +59,6 @@ class GmailAccount : public SourceAccount {
         QLabel gmailInfoHeader;
         QLabel gmailGmailLabel;
         QPushButton gmailCloneWithRecipientsButton;
-        
+
+        GetEmailRecipientsWizard getEmailRecipients;
 };

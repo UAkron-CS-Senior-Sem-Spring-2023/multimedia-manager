@@ -7,9 +7,8 @@
 
 #include "add-gmail-account-page.hpp"
 
-AddAccountWizard::AddAccountWizard(AccountManager* accountManager, QWidget* parent)
+AddAccountWizard::AddAccountWizard(QWidget* parent)
     : QWizard(parent),
-    accountManager(accountManager),
     accountTypeSelectionWizardPage(this),
     addAccountVendorWizardPage(this)
 {
@@ -21,21 +20,21 @@ AddAccountWizard::AddAccountWizard(AccountManager* accountManager, QWidget* pare
     addAccountVendorWizardPage.construct();
     connect(&accountTypeSelectionWizardPage, &AccountTypeSelectionWizardPage::vendorSelectionChanged, this, &AddAccountWizard::setVendorSelection);
 
-    connect(this, &AddAccountWizard::finished, [this, startingPageId, accountManager](){
+    connect(this, &AddAccountWizard::finished, [this, startingPageId](){
         // brings the wizard back to start when finished, (I'm surprised this isn't done automatically)
         setCurrentId(startingPageId);
 
         // moves all accounts created into account manager
         for (auto& sourceAccount : sourceAccountsToAdd) {
-            accountManager->addSourceAccount(std::move(sourceAccount));
+            AccountManager::singleton().addSourceAccount(std::move(sourceAccount));
         }
         sourceAccountsToAdd.clear();
         for (auto& recipientAccount : recipientAccountsToAdd) {
-            accountManager->addRecipientAccount(std::move(recipientAccount));
+            AccountManager::singleton().addRecipientAccount(std::move(recipientAccount));
         }
         recipientAccountsToAdd.clear();
         for (auto& dualAccount : dualAccountsToAdd) {
-            accountManager->addDualAccount(std::move(dualAccount));
+            AccountManager::singleton().addDualAccount(std::move(dualAccount));
         }
         dualAccountsToAdd.clear();
     });

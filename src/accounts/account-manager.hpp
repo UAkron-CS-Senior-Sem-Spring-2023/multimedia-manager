@@ -13,6 +13,8 @@ class AccountManager : public QObject {
     Q_OBJECT
 
     public:
+        static AccountManager& singleton();
+
         enum ManagingType {
             ACCOUNTS,
             ACCOUNT_GROUPS
@@ -49,6 +51,8 @@ class AccountManager : public QObject {
         void onAccountGroupAdded(const AccountGroup* accountGroup);
         void onAccountGroupsChanged(const std::unordered_set<AccountGroup*>& accountGroups);
     private:
+        static std::unique_ptr<AccountManager> singleton_;
+
         std::list<std::unique_ptr<Account>> accountsOwned;
         std::unordered_map<const Account*, SourceRecipientType> accountSourceRecipientTypes_;
         std::unordered_set<Account*> accounts_;

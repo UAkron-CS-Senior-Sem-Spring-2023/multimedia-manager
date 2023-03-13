@@ -2,6 +2,14 @@
 
 AccountManager::ManagingType AccountManager::INITIAL_MANAGING_TYPE = ACCOUNTS;
 
+std::unique_ptr<AccountManager> AccountManager::singleton_;
+AccountManager& AccountManager::singleton() {
+    if (!singleton_) {
+        singleton_ = std::make_unique<AccountManager>();
+    }
+    return *singleton_;
+}
+
 void AccountManager::addSourceAccount(std::unique_ptr<SourceAccount> sourceAccount) {
     SourceAccount* sourceAccountPtr = sourceAccount.get();
     accounts_.insert(sourceAccountPtr);

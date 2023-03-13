@@ -26,7 +26,6 @@ class MainWindow : public QMainWindow {
     public:
         MainWindow(QWidget* parent = nullptr);
 
-        AccountManager& accountManager();
         AddAccountWizard& addAccountWizard();
 
         void changeSelectedAccount(const Account* account);
@@ -40,7 +39,6 @@ class MainWindow : public QMainWindow {
         void selectedAccountGroupChanged(const AccountGroup* accountGroup);
         void selectedAccountGroupSourceRecipientTypeChanged(AccountManager::SourceRecipientType sourceRecipientType);
     private:
-        AccountManager accountManager_;
         AddAccountWizard addAccountWizard_;
 
         QWidget windowWidget;

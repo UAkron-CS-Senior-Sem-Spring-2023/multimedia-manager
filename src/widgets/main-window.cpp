@@ -7,7 +7,6 @@
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent),
-    addAccountWizard_(&accountManager_),
     windowGrid(QGridLayout(&windowWidget)),
     accountsWidget(this),
     accountInfoWidget(this),
@@ -34,17 +33,13 @@ MainWindow::MainWindow(QWidget* parent)
     setCentralWidget(&windowWidget);
 }
 
-AccountManager& MainWindow::accountManager() {
-    return accountManager_;
-}
-
 AddAccountWizard& MainWindow::addAccountWizard() {
     return addAccountWizard_;
 }
 
 void MainWindow::changeSelectedAccount(const Account* account) {
     emit selectedAccountChanged(account);
-    emit selectedAccountSourceRecipientTypeChanged(accountManager_.accountSourceRecipientType(account));
+    emit selectedAccountSourceRecipientTypeChanged(AccountManager::singleton().accountSourceRecipientType(account));
 }
 
 void MainWindow::changeSelectedAccountGroup(const AccountGroup* accountGroup) {
@@ -52,7 +47,7 @@ void MainWindow::changeSelectedAccountGroup(const AccountGroup* accountGroup) {
     bool isRecipient = true;
     bool isSource = true;
     for (const Account* account : *accountGroup) {
-        auto sourceRecipientType = accountManager_.accountSourceRecipientType(account);
+        auto sourceRecipientType = AccountManager::singleton().accountSourceRecipientType(account);
         isSource &= sourceRecipientType == AccountManager::SOURCE || sourceRecipientType == AccountManager::DUAL;
         isRecipient &= sourceRecipientType == AccountManager::RECIPIENT || sourceRecipientType == AccountManager::DUAL;
     }
