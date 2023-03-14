@@ -124,12 +124,3 @@ void QRequest::gmailOAuth(std::size_t request) {
     // 5 minute time to authenticate
     timeoutOAuth->start(300000);
 }
-
-void QRequest::gmailSMTP(
-    std::size_t request,
-    const std::string& oauthBearer,
-    const SMTPHeaders& headers,
-    const MimeData& mimeData
-) {
-    emit onResponse(request, Request::smtp("smtp://smtp.gmail.com:587", oauthBearer, headers, mimeData));
-}

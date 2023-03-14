@@ -7,17 +7,17 @@
 
 class AccountGroup {
     public:
-        template <class ConstAccountPtrContainer>
-        AccountGroup(ConstAccountPtrContainer&& container)
-            : accounts_(std::move(container))
-        {}
-
         template <class ConstAccountPtrIterator>
         AccountGroup(ConstAccountPtrIterator begin, ConstAccountPtrIterator end) {
             for (; begin != end; ++begin) {
                 accounts_.push_back(*begin);
             }
+            name_ = std::string("Unnamed group of ") + std::to_string(accounts_.size()) + " accounts";
         }
+        template <class ConstAccountPtrContainer>
+        AccountGroup(const ConstAccountPtrContainer& container)
+            : AccountGroup(container.begin(), container.end())
+        {}
 
         const std::string& name() const;
 

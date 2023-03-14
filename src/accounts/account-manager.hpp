@@ -6,6 +6,8 @@
 
 #include <QObject>
 
+#include "set-list.hpp"
+
 #include "account.hpp"
 #include "account-group.hpp"
 
@@ -32,6 +34,7 @@ class AccountManager : public QObject {
             GMAIL
         };
 
+
         void addSourceAccount(std::unique_ptr<SourceAccount> sourceAccount);
         void addRecipientAccount(std::unique_ptr<RecipientAccount> recipientAccount);
         void addDualAccount(std::unique_ptr<DualAccount> dualAccount);
@@ -39,28 +42,29 @@ class AccountManager : public QObject {
 
         SourceRecipientType accountSourceRecipientType(const Account* account) const;
 
+        const SetList<Account*>& accounts() const;
     signals:
         void onAccountAdded(const Account* account);
-        void onAccountsChanged(const std::unordered_set<Account*>& accounts);
+        void onAccountsChanged(const SetList<Account*>& accounts);
         void onSourceAccountAdded(const SourceAccount* sourceAccount);
-        void onSourceAccountsChanged(const std::unordered_set<SourceAccount*>& sourceAccounts);
+        void onSourceAccountsChanged(const SetList<SourceAccount*>& sourceAccounts);
         void onRecipientAccountAdded(const RecipientAccount* recipientAccount);
-        void onRecipientAccountsChanged(const std::unordered_set<RecipientAccount*>& recipientAccounts);
+        void onRecipientAccountsChanged(const SetList<RecipientAccount*>& recipientAccounts);
         void onDualAccountAdded(const DualAccount* dualAccount);
-        void onDualAccountsChanged(const std::unordered_set<DualAccount*>& dualAccounts);
+        void onDualAccountsChanged(const SetList<DualAccount*>& dualAccounts);
         void onAccountGroupAdded(const AccountGroup* accountGroup);
-        void onAccountGroupsChanged(const std::unordered_set<AccountGroup*>& accountGroups);
+        void onAccountGroupsChanged(const SetList<AccountGroup*>& accountGroups);
     private:
         static std::unique_ptr<AccountManager> singleton_;
 
         std::list<std::unique_ptr<Account>> accountsOwned;
         std::unordered_map<const Account*, SourceRecipientType> accountSourceRecipientTypes_;
-        std::unordered_set<Account*> accounts_;
-        std::unordered_set<SourceAccount*> sourceAccounts_;
-        std::unordered_set<RecipientAccount*> recipientAccounts_;
-        std::unordered_set<DualAccount*> dualAccounts_;
+        SetList<Account*> accounts_;
+        SetList<SourceAccount*> sourceAccounts_;
+        SetList<RecipientAccount*> recipientAccounts_;
+        SetList<DualAccount*> dualAccounts_;
 
         std::list<std::unique_ptr<AccountGroup>> accountGroupsOwned;
-        std::unordered_set<AccountGroup*> accountGroups_;
+        SetList<AccountGroup*> accountGroups_;
         
 };

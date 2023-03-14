@@ -13,7 +13,7 @@ class GmailAccountWithRecipients : public DualAccount, public GmailAccount {
 
         const std::string& name() const;
 
-        void send(const Request::MimeData& mimeData) const override;
+        void send(const std::string& subject, const Request::MimeData& mimeData) const override;
     private:
         std::string name_;
 

@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "add-account-wizard/add-account-wizard.hpp"
+#include "add-account-group-wizard.hpp"
 
 class MainWindow;
 
@@ -20,6 +21,8 @@ class AccountsWidget : public QWidget {
         AccountsWidget(MainWindow* mainWindow, QWidget* parent = nullptr);
     private:
         MainWindow* mainWindow;
+        AddAccountWizard addAccountWizard;
+        AddAccountGroupWizard addAccountGroupWizard;
 
         QGridLayout manageableGrid;
 
@@ -48,6 +51,4 @@ class AccountsWidget : public QWidget {
         QHBoxLayout modifyManageableAccountGroupLayout;
         QPushButton addManageableAccountGroupButton;
         QPushButton removeManageableAccountGroupButton;
-
-        void addAccountClicked();
 };

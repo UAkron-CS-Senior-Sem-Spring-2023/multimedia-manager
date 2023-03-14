@@ -55,10 +55,6 @@ class GmailAccount : public virtual SourceAccount, public QObject {
         GmailInbox inbox_;
 
         mutable QWidget infoWidget;
-        QGridLayout infoLayout;
-        QLabel gmailInfoHeader;
-        QLabel gmailGmailLabel;
-        QPushButton gmailCloneWithRecipientsButton;
 
         std::unique_ptr<GetEmailRecipientsWizard> getEmailRecipientsWizard;
 };

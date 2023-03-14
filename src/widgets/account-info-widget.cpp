@@ -2,6 +2,8 @@
 
 #include "main-window.hpp"
 
+#include <iostream>
+
 AccountInfoWidget::AccountInfoWidget(MainWindow* mainWindow, QWidget* parent)
     : QWidget(parent),
     mainWindow(mainWindow),
@@ -33,11 +35,10 @@ AccountInfoWidget::AccountInfoWidget(MainWindow* mainWindow, QWidget* parent)
     managingAccountInfoLayout.addWidget(&managingAccountInfoBackgroundWidget, accountInfoWorkingRow++, 0);
     // updates to the new account info selected
     connect(mainWindow, &MainWindow::selectedAccountChanged, [this](const Account* account){
-        QWidget* from;
         if (currentAccountInfoWidget == nullptr) {
-            from = &noAccountInfoWidget;
+            noAccountInfoWidget.setParent(nullptr);
         } else {
-            from = currentAccountInfoWidget;
+            currentAccountInfoWidget->setParent(nullptr);
         }
 
         QWidget* to;
@@ -49,7 +50,7 @@ AccountInfoWidget::AccountInfoWidget(MainWindow* mainWindow, QWidget* parent)
             to = currentAccountInfoWidget;
         }
 
-        managingAccountInfoBackgroundLayout.replaceWidget(from, to);
+        managingAccountInfoBackgroundLayout.addWidget(to, 0, 0);
     });
     managingTypeStackedLayout.insertWidget(AccountManager::ACCOUNTS, &managingAccountInfoWidget);
 
@@ -64,23 +65,22 @@ AccountInfoWidget::AccountInfoWidget(MainWindow* mainWindow, QWidget* parent)
     managingAccountGroupInfoLayout.addWidget(&managingAccountGroupInfoBackgroundWidget, accountGroupInfoWorkingRow++, 0);
     // updates to the new account group info selected
     connect(mainWindow, &MainWindow::selectedAccountGroupChanged, [this](const AccountGroup* accountGroup){
-        QWidget* from;
-        if (currentAccountInfoWidget == nullptr) {
-            from = &noAccountInfoWidget;
+        if (currentAccountGroupInfoWidget == nullptr) {
+            noAccountGroupInfoWidget.setParent(nullptr);
         } else {
-            from = currentAccountInfoWidget;
+            currentAccountGroupInfoWidget->setParent(nullptr);
         }
 
         QWidget* to;
         if (accountGroup == nullptr) {
-            currentAccountInfoWidget = nullptr;
-            to = &noAccountInfoWidget;
+            currentAccountGroupInfoWidget = nullptr;
+            to = &noAccountGroupInfoWidget;
         } else {
-            currentAccountInfoWidget = &accountGroup->info();
-            to = currentAccountInfoWidget;
+            currentAccountGroupInfoWidget = &accountGroup->info();
+            to = currentAccountGroupInfoWidget;
         }
 
-        managingAccountInfoBackgroundLayout.replaceWidget(from, to);
+        managingAccountGroupInfoBackgroundLayout.addWidget(to, 0, 0);
     });
     managingTypeStackedLayout.insertWidget(AccountManager::ACCOUNT_GROUPS, &managingAccountGroupInfoWidget);
 
@@ -92,6 +92,15 @@ AccountInfoWidget::AccountInfoWidget(MainWindow* mainWindow, QWidget* parent)
     // set up actionable buttons for that account
 
     managingAccountSendMessageButton.setEnabled(false);
+    connect(&accountSendMessageWizard, &SendMessageWizard::gotMessage, [this](std::string subject, Request::MimeData mimeData) {
+        dynamic_cast<const RecipientAccount*>(this->mainWindow->selectedAccount())->send(std::move(subject), std::move(mimeData));
+    });
+    connect(&managingAccountSendMessageButton, &QPushButton::clicked, [this](){
+        accountSendMessageWizard.show();
+    });
+    connect(mainWindow, &MainWindow::selectedAccountChanged, [this](){
+        accountSendMessageWizard.hide();
+    });
     managingAccountActionButtonsLayout.addWidget(&managingAccountSendMessageButton);
     managingAccountActionButtonsLayout.addStretch(1);
     managingAccountViewInboxButton.setEnabled(false);
@@ -105,10 +114,22 @@ AccountInfoWidget::AccountInfoWidget(MainWindow* mainWindow, QWidget* parent)
     managingActionButtonsStackedLayout.insertWidget(AccountManager::ACCOUNTS, &managingAccountActionButtonsWidget);
 
     managingAccountGroupSendMessageButton.setEnabled(false);
+    connect(&accountGroupSendMessageWizard, &SendMessageWizard::gotMessage, [this](std::string subject, Request::MimeData mimeData) {
+        for (const auto* account : *this->mainWindow->selectedAccountGroup()) {
+            std::cout << "sent on " << account->name() << std::endl;
+            dynamic_cast<const RecipientAccount*>(account)->send(std::move(subject), std::move(mimeData));
+        }
+    });
+    connect(&managingAccountGroupSendMessageButton, &QPushButton::clicked, [this](){
+        accountGroupSendMessageWizard.show();
+    });
+    connect(mainWindow, &MainWindow::selectedAccountGroupChanged, [this](){
+        accountGroupSendMessageWizard.hide();
+    });
     managingAccountGroupActionButtonsLayout.addWidget(&managingAccountGroupSendMessageButton);
     managingAccountGroupActionButtonsLayout.addStretch(1);
     managingAccountGroupViewInboxButton.setEnabled(false);
-    connect(mainWindow, &MainWindow::selectedAccountGroupSourceRecipientTypeChanged, [this](AccountManager::SourceRecipientType sourceRecipientType){
+    connect(mainWindow, &MainWindow::selectedAccountGroupSourceRecipientTypeChanged, [this](AccountManager::SourceRecipientType sourceRecipientType) {
         // enable the button only if the account is capable of sending
         managingAccountGroupSendMessageButton.setEnabled(sourceRecipientType == AccountManager::RECIPIENT || sourceRecipientType == AccountManager::DUAL);
         // enable the button only if the account is capable of receiving

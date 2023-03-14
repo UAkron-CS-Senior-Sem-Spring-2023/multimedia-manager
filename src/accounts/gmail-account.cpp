@@ -44,17 +44,16 @@ void GmailInbox::populate() {
 }
 
 GmailAccount::GmailAccount(std::string gmail, std::string oauthBearer, QObject* parent)
-    : QObject(parent), name_(gmail), gmail_(gmail), oauthBearer_(oauthBearer), inbox_(GmailInbox(this)), 
-    infoLayout(&infoWidget),
-    gmailInfoHeader("Gmail Information:"),
-    gmailCloneWithRecipientsButton("Create account from this with recipients")
+    : QObject(parent), name_(gmail), gmail_(gmail), oauthBearer_(oauthBearer), inbox_(GmailInbox(this))
 {
+    QGridLayout* infoLayout = new QGridLayout(&infoWidget);
     int workingRow = 0;
-    gmailGmailLabel.setText(QString::fromStdString(std::string("Gmail: ") + gmail_));
-    infoLayout.addWidget(&gmailInfoHeader, workingRow++, 0);
-    infoLayout.addWidget(&gmailGmailLabel, workingRow++, 0);
 
-    connect(&gmailCloneWithRecipientsButton, &QPushButton::clicked, [this]() {
+    infoLayout->addWidget(new QLabel(tr("Gmail Information:")), workingRow++, 0);
+    infoLayout->addWidget(new QLabel(QString::fromStdString(std::string("Gmail: ") + gmail_)), workingRow++, 0);
+
+    QPushButton* gmailCloneWithRecipientsButton = new QPushButton(tr("Create account from this with recipients"));
+    connect(gmailCloneWithRecipientsButton, &QPushButton::clicked, [this]() {
         if (!getEmailRecipientsWizard) {
             getEmailRecipientsWizard = std::make_unique<GetEmailRecipientsWizard>();
         }
@@ -66,8 +65,8 @@ GmailAccount::GmailAccount(std::string gmail, std::string oauthBearer, QObject* 
         });
         getEmailRecipientsWizard->show();
     });
-    infoLayout.addWidget(&gmailCloneWithRecipientsButton, workingRow++, 0);
-    infoLayout.setRowStretch(workingRow, 1);
+    infoLayout->addWidget(gmailCloneWithRecipientsButton, workingRow++, 0);
+    infoLayout->setRowStretch(workingRow, 1);
 }
 
 const std::string& GmailAccount::name() const {

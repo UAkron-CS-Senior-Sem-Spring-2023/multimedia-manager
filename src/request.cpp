@@ -1,8 +1,6 @@
 #include "request.hpp"
 
 #include <ctime>
-#include <stdexcept>
-#include <random>
 
 #include <curl/curl.h>
 
@@ -140,68 +138,6 @@ std::string* Request::imapImpl(const std::string& url, const std::string& userna
     } else {
         return &data;
     }
-}
-
-Request::SMTPHeaders::SMTPHeaders(std::string from_, std::vector<std::string> toRecipients_, std::vector<std::string> ccRecipients_, std::string subject_)
-    : from(std::move(from_)), toRecipients(std::move(toRecipients_)), ccRecipients(std::move(ccRecipients_)), subject(std::move(subject_))
-{
-    if (toRecipients.size() == 0) {
-        throw std::logic_error("There must be at least 1 recipient");
-    }
-    if (from.size() < 3) {
-        throw std::logic_error("The email must have been sent from somebody (i.e. at least \"<a>\" (3) in length");
-    }
-
-    for (const auto& toRecipient : toRecipients) {
-        curlMailRecipients_ = curl_slist_append(curlMailRecipients_, toRecipient.c_str());
-    }
-    for (const auto& ccRecipient : ccRecipients) {
-        curlMailRecipients_ = curl_slist_append(curlMailRecipients_, ccRecipient.c_str());
-    }
-
-    std::string dateStr = "Date: ";
-    // - 1 to exclude null terminator
-    dateStr.resize(sizeof("Date: Tue, 22 Aug 2020 22:33:44 -0200") - 1);
-    time_t now_t = time(NULL);
-    tm* now = localtime(&now_t);
-    // example "Tue, 22 Aug 2020 22:33:44 -0200"
-    std::strftime(dateStr.data() + sizeof("Date: ") - 1, 31, "%a, %d %b %Y %H:%M:%S %z", now);
-    curlHeaders_ = curl_slist_append(curlHeaders_, dateStr.c_str());
-
-    std::string toStr = "To:";
-    for (const auto& toRecipient : toRecipients) {
-        toStr += " " + toRecipient;
-    }
-    curlHeaders_ = curl_slist_append(curlHeaders_, toStr.c_str());
-
-    std::string fromStr = "From: " + from;
-    curlHeaders_ = curl_slist_append(curlHeaders_, fromStr.c_str());
-
-    std::string ccStr = "Cc:";
-    for (const auto& ccRecipient : ccRecipients) {
-        toStr += " " + ccRecipient;
-    }
-    curlHeaders_ = curl_slist_append(curlHeaders_, ccStr.c_str());
-
-    std::string messageIdStr = "Message-ID: <";
-
-    std::random_device dev;
-    std::mt19937 rng(dev());
-    std::uniform_int_distribution<std::mt19937::result_type> dist(0,35);
-    const char MESSAGE_ID_CHARACTERS[] = {
-        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
-        'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
-        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'
-    };
-    for (int i = 0; i < 40; ++i) {
-        messageIdStr += MESSAGE_ID_CHARACTERS[dist(rng)];
-    }
-    messageIdStr += "@mmanager>";
-
-    curlHeaders_ = curl_slist_append(curlHeaders_, messageIdStr.c_str());
-
-    std::string subjectStr = "Subject: " + subject;
-    curlHeaders_ = curl_slist_append(curlHeaders_, subjectStr.c_str());
 }
 
 Request::SMTPHeaders::~SMTPHeaders() {

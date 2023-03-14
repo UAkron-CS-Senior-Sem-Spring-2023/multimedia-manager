@@ -11,8 +11,6 @@
 #include <QLineEdit>
 #include <QPushButton>
 
-#include <iostream>
-
 class GetEmailRecipientsWizard : public QWizard {
     Q_OBJECT
 

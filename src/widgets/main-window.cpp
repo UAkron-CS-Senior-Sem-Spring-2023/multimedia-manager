@@ -35,20 +35,26 @@ MainWindow::MainWindow(QWidget* parent)
     setCentralWidget(&windowWidget);
 }
 
-AddAccountWizard& MainWindow::addAccountWizard() {
-    return addAccountWizard_;
+const Account* MainWindow::selectedAccount() const {
+    return selectedAccount_;
+}
+const AccountGroup* MainWindow::selectedAccountGroup() const {
+    return selectedAccountGroup_;
 }
 
 void MainWindow::changeSelectedAccount(const Account* account) {
-    emit selectedAccountChanged(account);
-    emit selectedAccountSourceRecipientTypeChanged(AccountManager::singleton().accountSourceRecipientType(account));
+    selectedAccount_ = account;
+
+    emit selectedAccountChanged(selectedAccount_);
+    emit selectedAccountSourceRecipientTypeChanged(AccountManager::singleton().accountSourceRecipientType(selectedAccount_));
 }
 
 void MainWindow::changeSelectedAccountGroup(const AccountGroup* accountGroup) {
-    emit selectedAccountGroupChanged(accountGroup);
+    selectedAccountGroup_ = accountGroup;
+
     bool isRecipient = true;
     bool isSource = true;
-    for (const Account* account : *accountGroup) {
+    for (const Account* account : *selectedAccountGroup_) {
         auto sourceRecipientType = AccountManager::singleton().accountSourceRecipientType(account);
         isSource &= sourceRecipientType == AccountManager::SOURCE || sourceRecipientType == AccountManager::DUAL;
         isRecipient &= sourceRecipientType == AccountManager::RECIPIENT || sourceRecipientType == AccountManager::DUAL;
@@ -62,6 +68,7 @@ void MainWindow::changeSelectedAccountGroup(const AccountGroup* accountGroup) {
     } else {
         emit selectedAccountGroupSourceRecipientTypeChanged(AccountManager::NONE);
     }
+    emit selectedAccountGroupChanged(selectedAccountGroup_);
 }
 
 void MainWindow::manageableAccountsButtonClicked() {

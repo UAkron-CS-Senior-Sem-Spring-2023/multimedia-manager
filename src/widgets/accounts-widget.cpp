@@ -2,6 +2,8 @@
 
 #include "main-window.hpp"
 
+#include <iostream>
+
 AccountsWidget::AccountsWidget(MainWindow* mainWindow, QWidget* parent)
     : QWidget(parent),
     mainWindow(mainWindow),
@@ -12,6 +14,7 @@ AccountsWidget::AccountsWidget(MainWindow* mainWindow, QWidget* parent)
     modifyManageableAccountLayout(QHBoxLayout(&modifyManageableAccountWidget)),
     addManageableAccountButton(QPushButton(tr("Add Account"))),
     removeManageableAccountButton(QPushButton(tr("Remove Account"))),
+    accountGroupNamesLayout(QGridLayout(&accountGroupNamesWidget)),
     modifyManageableAccountGroupLayout(QHBoxLayout(&modifyManageableAccountGroupWidget)),
     addManageableAccountGroupButton(QPushButton(tr("Add Account Group"))),
     removeManageableAccountGroupButton(QPushButton(tr("Remove Account Group")))
@@ -29,7 +32,7 @@ AccountsWidget::AccountsWidget(MainWindow* mainWindow, QWidget* parent)
     // set up manageable list
     accountNamesWidget.setBackgroundRole(QPalette::Base);
     accountNamesWidget.setAutoFillBackground(true);
-    connect(&AccountManager::singleton(), &AccountManager::onAccountsChanged, [this](const std::unordered_set<Account*> accounts) {
+    connect(&AccountManager::singleton(), &AccountManager::onAccountsChanged, [this](const SetList<Account*>& accounts) {
         for (auto& widget : accountNames) {
             accountNamesLayout.removeWidget(widget.get());
         }
@@ -49,17 +52,17 @@ AccountsWidget::AccountsWidget(MainWindow* mainWindow, QWidget* parent)
 
     accountGroupNamesWidget.setBackgroundRole(QPalette::Base);
     accountGroupNamesWidget.setAutoFillBackground(true);
-    connect(&AccountManager::singleton(), &AccountManager::onAccountGroupsChanged, [this](const std::unordered_set<AccountGroup*> accountGroups) {
+    connect(&AccountManager::singleton(), &AccountManager::onAccountGroupsChanged, [this](const SetList<AccountGroup*>& accountGroups) {
         for (auto& widget : accountGroupNames) {
             accountGroupNamesLayout.removeWidget(widget.get());
         }
         accountGroupNames.clear();
-        
+
         int workingRow = 0;
         for (const auto* accountGroup : accountGroups) {
             accountGroupNames.push_back(std::make_unique<QPushButton>(QString::fromStdString(accountGroup->name())));
             accountGroupNamesLayout.addWidget(accountGroupNames.back().get(), workingRow++, 0);
-            connect(accountNames.back().get(), &QPushButton::clicked, [this, accountGroup](){
+            connect(accountGroupNames.back().get(), &QPushButton::clicked, [this, accountGroup](){
                 this->mainWindow->changeSelectedAccountGroup(accountGroup);
             });
         }
@@ -72,12 +75,17 @@ AccountsWidget::AccountsWidget(MainWindow* mainWindow, QWidget* parent)
     manageableGrid.addLayout(&namesStackedLayout, workingRow++, 0, 1, 2);
 
     // set up buttons to modify accounts
+    connect(&addManageableAccountButton, &QPushButton::clicked, [this]() {
+        addAccountWizard.show();
+    });
     modifyManageableAccountLayout.addWidget(&addManageableAccountButton);
-    connect(&addManageableAccountButton, &QPushButton::clicked, this, &AccountsWidget::addAccountClicked);
     modifyManageableAccountLayout.addStretch(1);
     modifyManageableAccountLayout.addWidget(&removeManageableAccountButton);
     modifyManageablesButtonsStackedLayout.insertWidget(AccountManager::ACCOUNTS, &modifyManageableAccountWidget);
 
+    connect(&addManageableAccountGroupButton, &QPushButton::clicked, [this]() {
+        addAccountGroupWizard.show();
+    });
     modifyManageableAccountGroupLayout.addWidget(&addManageableAccountGroupButton);
     modifyManageableAccountGroupLayout.addStretch(1);
     modifyManageableAccountGroupLayout.addWidget(&removeManageableAccountGroupButton);
@@ -86,8 +94,4 @@ AccountsWidget::AccountsWidget(MainWindow* mainWindow, QWidget* parent)
     modifyManageablesButtonsStackedLayout.setCurrentIndex(AccountManager::INITIAL_MANAGING_TYPE);
     connect(mainWindow, &MainWindow::onUpdateManagingType, &modifyManageablesButtonsStackedLayout, &QStackedLayout::setCurrentIndex);
     manageableGrid.addLayout(&modifyManageablesButtonsStackedLayout, workingRow++, 0, 1, 2);
-}
-
-void AccountsWidget::addAccountClicked() {
-    mainWindow->addAccountWizard().show();
 }

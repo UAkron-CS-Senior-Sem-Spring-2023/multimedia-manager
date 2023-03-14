@@ -6,5 +6,5 @@ class MessagingRecipient {
     public:
         virtual ~MessagingRecipient() = default;
 
-        virtual void send(const Request::MimeData& message) const = 0;
+        virtual void send(const std::string& subject, const Request::MimeData& message) const = 0;
 };

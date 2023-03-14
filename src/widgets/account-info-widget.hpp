@@ -10,6 +10,8 @@
 
 #include <vector>
 
+#include "send-message-wizard.hpp"
+
 class MainWindow;
 
 class AccountInfoWidget : public QWidget {
@@ -50,4 +52,7 @@ class AccountInfoWidget : public QWidget {
         QHBoxLayout managingAccountGroupActionButtonsLayout;
         QPushButton managingAccountGroupSendMessageButton;
         QPushButton managingAccountGroupViewInboxButton;
+
+        SendMessageWizard accountSendMessageWizard;
+        SendMessageWizard accountGroupSendMessageWizard;
 };

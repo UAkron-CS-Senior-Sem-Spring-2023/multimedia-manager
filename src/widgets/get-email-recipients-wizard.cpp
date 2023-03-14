@@ -23,7 +23,7 @@ GetEmailRecipientsWizard::GetEmailRecipientsWizard(QWidget* parent)
     recipientRemovalButtonsScrollArea->setWidget(recipientRemovalButtonsWidget);
     recipientRemovalButtonsScrollArea->setWidgetResizable(true);
 
-    getRecipientsLayout->addWidget(recipientRemovalButtonsWidget, workingRow++, 0, 1, 2);
+    getRecipientsLayout->addWidget(recipientRemovalButtonsScrollArea, workingRow++, 0, 1, 2);
     getRecipientsLayout->addWidget(new QLabel(tr("Enter a recipient's email address in the field below then press the 'Add Recipient' button to add it to the list.")), workingRow++, 0, 1, 2);
     QLineEdit* recipientEnteringTextLine = new QLineEdit;
     getRecipientsLayout->addWidget(recipientEnteringTextLine, workingRow, 0);
@@ -71,6 +71,8 @@ GetEmailRecipientsWizard::GetEmailRecipientsWizard(QWidget* parent)
         std::list<std::string> emailRecipients;
         for (const auto& recipientRemovalButton : recipientRemovalButtons) {
             emailRecipients.push_back(recipientRemovalButton.second->text().toStdString());
+            recipientRemovalButton.second->setParent(nullptr);
+            delete recipientRemovalButton.second;
         }
 
         emit gotEmailRecipients(std::move(emailRecipients));
