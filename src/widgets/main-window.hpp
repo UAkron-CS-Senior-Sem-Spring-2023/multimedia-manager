@@ -40,17 +40,6 @@ class MainWindow : public QMainWindow {
         const Account* selectedAccount_;
         const AccountGroup* selectedAccountGroup_;
 
-        QWidget windowWidget;
-        QGridLayout windowGrid;
-
-        AccountsWidget accountsWidget;
-        AccountInfoWidget accountInfoWidget;
-
-        QHBoxLayout manageableTypeLayout;
-        QGroupBox manageableTypeGroupBox;
-        QHBoxLayout manageableTypeGroupBoxLayout;
         void manageableAccountsButtonClicked();
-        QPushButton manageableAccountsButton;
         void manageableAccountGroupsButtonClicked();
-        QPushButton manageableAccountGroupsButton;
 };

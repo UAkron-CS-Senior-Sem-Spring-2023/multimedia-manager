@@ -18,7 +18,7 @@ Inbox::iterator& GmailInbox::iterator::operator++() {
 std::unique_ptr<Inbox::iterator> GmailInbox::iterator::operator++(int) {
     auto iterator = std::unique_ptr<Inbox::iterator>(new GmailInbox::iterator(messageIterator));
     ++messageIterator;
-    return std::move(iterator);
+    return iterator;
 }
 
 typename Inbox::iterator::const_reference GmailInbox::iterator::operator*() const {

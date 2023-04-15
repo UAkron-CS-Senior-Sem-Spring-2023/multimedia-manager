@@ -13,11 +13,7 @@ class AddAccountVendorWizardPage : public QWizardPage {
         // must be constructed after AddAccountWizard is finished initializing, so there is a separate constructor
         void construct();
 
-        void setVendorSelection(AccountManager::AccountVendor vendor);
-
         bool isComplete() const override;
     private:
-        AddAccountWizard* addAccountWizard;
-
-        QStackedLayout accountSpecificsStackedLayout;
+        AddAccountWizard* addAccountWizard;  
 };

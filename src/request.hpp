@@ -129,7 +129,7 @@ class Request {
             const MimeData& mimeData
         );
 
-        static std::string* imap(const std::string& url, const std::string& username, const std::string& oauthBearer);
+        static std::string* imap(const std::string& url, const std::string& oauthBearer, const std::string& imapCommands = "");
     private:
         std::string* getImpl(const std::string& url);
         std::string* authGetImpl(const std::string& url, const std::string& oauthBearer);
@@ -167,7 +167,7 @@ class Request {
             const MimeData& mimeData
         );
 
-        std::string* imapImpl(const std::string& url, const std::string& username, const std::string& oauthBearer);
+        std::string* imapImpl(const std::string& url, const std::string& oauthBearer, const std::string& imapCommands = "");
 
         static Request& singleton();
 

@@ -123,14 +123,16 @@ std::string* Request::smtpImpl(
     }
 }
 
-std::string* Request::imap(const std::string& url, const std::string& username, const std::string& oauthBearer) {
-    return singleton().imapImpl(url, username, oauthBearer);
+std::string* Request::imap(const std::string& url, const std::string& oauthBearer, const std::string& imapCommands) {
+    return singleton().imapImpl(url, oauthBearer, imapCommands);
 }
-std::string* Request::imapImpl(const std::string& url, const std::string& username, const std::string& oauthBearer) {
+std::string* Request::imapImpl(const std::string& url, const std::string& oauthBearer, const std::string& imapCommands) {
     curl_easy_setopt(handle, CURLOPT_URL, url.c_str());
     curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, handleDataStatic);
-    curl_easy_setopt(handle, CURLOPT_USERNAME, username.c_str());
     curl_easy_setopt(handle, CURLOPT_XOAUTH2_BEARER, oauthBearer.c_str());
+    if (imapCommands != "") {
+        curl_easy_setopt(handle, CURLOPT_CUSTOMREQUEST, imapCommands.c_str());
+    }
 
     auto status = curl_easy_perform(handle);
     if (status != CURLE_OK) {

@@ -2,6 +2,7 @@
 
 #include "request.hpp"
 
+#include <limits>
 #include <memory>
 
 #include <QOAuth2AuthorizationCodeFlow>
@@ -23,6 +24,10 @@ QRequest& QRequest::singleton() {
 
 std::size_t QRequest::getUniqueRequest() {
     return request_++;
+}
+
+std::size_t QRequest::getNonUniqueRequest() {
+    return std::numeric_limits<std::size_t>::max();
 }
 
 QRequest::QRequest(QObject* parent)
@@ -48,6 +53,15 @@ void QRequest::smtp(
     const MimeData& mimeData
 ) {
     emit onResponse(request, Request::smtp(url, oauthBearer, headers, mimeData));
+}
+
+void QRequest::imap(
+    std::size_t request,
+    const std::string& url,
+    const std::string& oauthBearer,
+    const std::string& imapCommands
+) {
+    emit onResponse(request, Request::imap(url, oauthBearer, imapCommands));
 }
 
 void QRequest::gmailGetUser(
@@ -123,4 +137,13 @@ void QRequest::gmailOAuth(std::size_t request) {
     });
     // 5 minute time to authenticate
     timeoutOAuth->start(300000);
+}
+
+void QRequest::gmailSMTP(
+    std::size_t request,
+    const std::string& oauthBearer,
+    const SMTPHeaders& headers,
+    const MimeData& mimeData
+) {
+    emit onResponse(request, Request::smtp("smtp://smtp.gmail.com:587", oauthBearer, headers, mimeData));
 }

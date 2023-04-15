@@ -7,24 +7,24 @@
 #include <QTextEdit>
 
 SendMessageWizard::SendMessageWizard(QWidget* parent) {
-    QGridLayout* sendMessageWizardPageLayout = new QGridLayout;
+    auto* sendMessageWizardPageLayout = new QGridLayout;
     int workingRow = 0;
 
     sendMessageWizardPageLayout->addWidget(
         new QLabel(tr("Enter the subject for your message below, in non-email accounts this will be included as 'Subject: '.")),
         workingRow++, 0
     );
-    QLineEdit* subjectLine = new QLineEdit;
+    auto* subjectLine = new QLineEdit;
     sendMessageWizardPageLayout->addWidget(subjectLine, workingRow++, 0);
 
     sendMessageWizardPageLayout->addWidget(
         new QLabel(tr("Enter the body for your message below.")),
         workingRow++, 0
     );
-    QTextEdit* bodyTextArea = new QTextEdit;
+    auto* bodyTextArea = new QTextEdit;
     sendMessageWizardPageLayout->addWidget(bodyTextArea, workingRow++, 0);
 
-    QWizardPage* sendMessageWizardPage = new QWizardPage;
+    auto* sendMessageWizardPage = new QWizardPage;
     sendMessageWizardPage->setLayout(sendMessageWizardPageLayout);
 
     addPage(sendMessageWizardPage);

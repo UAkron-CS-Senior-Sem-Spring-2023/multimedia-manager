@@ -20,9 +20,12 @@ AddAccountWizard::AddAccountWizard(QWidget* parent)
     addAccountVendorWizardPage.construct();
     connect(&accountTypeSelectionWizardPage, &AccountTypeSelectionWizardPage::vendorSelectionChanged, this, &AddAccountWizard::setVendorSelection);
 
-    connect(this, &AddAccountWizard::finished, [this, startingPageId](){
+    connect(this, &AddAccountWizard::finished, [this, startingPageId]() {
         // brings the wizard back to start when finished, (I'm surprised this isn't done automatically)
         setCurrentId(startingPageId);
+    });
+
+    connect(this, &AddAccountWizard::accepted, [this, startingPageId]() {
 
         // moves all accounts created into account manager
         for (auto& sourceAccount : sourceAccountsToAdd) {
@@ -70,7 +73,7 @@ void AddAccountWizard::addDualAccountToAdd(std::unique_ptr<DualAccount> dualAcco
 
 void AddAccountWizard::initializeAccountSpecificPageMap() {
     accountSpecificPageMap_.insert_or_assign(AccountManager::GMAIL, AccountSpecificPageInfo {
-        .radioButton = std::unique_ptr<QRadioButton>(new QRadioButton(tr("Gmail"))),
-        .page = std::unique_ptr<ValidatableAddAccountPage>(new AddGmailAccountPage(this))
+        .radioButton = new QRadioButton(tr("Gmail")),
+        .page = new AddGmailAccountPage(this)
     });
 }

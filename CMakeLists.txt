@@ -8,6 +8,7 @@ project(MultimediaManager
 set(CMAKE_AUTOMOC ON)
 
 add_executable(MultimediaManager)
+target_compile_options(MultimediaManager PRIVATE -Wall)
 
 find_package(Qt6 REQUIRED COMPONENTS Widgets)
 find_package(Qt6 REQUIRED COMPONENTS NetworkAuth)

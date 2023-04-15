@@ -14,6 +14,7 @@ class QRequest : public QObject {
         static QRequest& singleton();
 
         std::size_t getUniqueRequest();
+        std::size_t getNonUniqueRequest();
 
         void get(std::size_t request, const std::string& url);
         void authGet(std::size_t request, const std::string& url, const std::string& oauthBearer);
@@ -25,7 +26,7 @@ class QRequest : public QObject {
             const SMTPHeaders& headers,
             const MimeData& mimeData
         );
-        void imap(std::size_t request);
+        void imap(std::size_t request, const std::string& url, const std::string& oauthBearer, const std::string& imapCommands = "");
         
         void gmailOAuth(
             std::size_t request
@@ -41,6 +42,11 @@ class QRequest : public QObject {
             const std::string& oauthBearer,
             const SMTPHeaders& headers,
             const MimeData& mimeData
+        );
+        void gmailIMAP(
+            std::size_t request,
+            const std::string& oauthBearer,
+            const std::string& imapCommands = ""
         );
     signals:
         void onResponse(std::size_t request, std::string* response);

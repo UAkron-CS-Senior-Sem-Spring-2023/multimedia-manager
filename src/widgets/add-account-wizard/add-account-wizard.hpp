@@ -18,8 +18,8 @@ class AddAccountWizard : public QWizard {
         AddAccountWizard(QWidget* parent = nullptr);
 
         struct AccountSpecificPageInfo {
-            std::unique_ptr<QRadioButton> radioButton;
-            std::unique_ptr<ValidatableAddAccountPage> page;
+            QRadioButton* radioButton;
+            ValidatableAddAccountPage* page;
         };
 
         void setVendorSelection(AccountManager::AccountVendor vendor);

@@ -24,31 +24,6 @@ class AccountsWidget : public QWidget {
         AddAccountWizard addAccountWizard;
         AddAccountGroupWizard addAccountGroupWizard;
 
-        QGridLayout manageableGrid;
-
-        QStackedLayout managingTypeStackedLayout;
-        QLabel managingAccountsLabel;
-        QLabel managingAccountGroupsLabel;
-
-        QStackedLayout namesStackedLayout;
-
-        QWidget accountNamesWidget;
-        QGridLayout accountNamesLayout;
         std::vector<std::unique_ptr<QPushButton>> accountNames;
-
-        QWidget accountGroupNamesWidget;
-        QGridLayout accountGroupNamesLayout;
         std::vector<std::unique_ptr<QPushButton>> accountGroupNames;
-
-        QStackedLayout modifyManageablesButtonsStackedLayout;
-
-        QWidget modifyManageableAccountWidget;
-        QHBoxLayout modifyManageableAccountLayout;
-        QPushButton addManageableAccountButton;
-        QPushButton removeManageableAccountButton;
-
-        QWidget modifyManageableAccountGroupWidget;
-        QHBoxLayout modifyManageableAccountGroupLayout;
-        QPushButton addManageableAccountGroupButton;
-        QPushButton removeManageableAccountGroupButton;
 };

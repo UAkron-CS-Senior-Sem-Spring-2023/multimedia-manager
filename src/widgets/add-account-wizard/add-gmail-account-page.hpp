@@ -19,14 +19,6 @@ class AddGmailAccountPage : public ValidatableAddAccountPage {
     private:
         AddAccountWizard* addAccountWizard;
 
-        QGridLayout addGmailAccountPageLayout;
-        QLabel gmailAccountInformation;
-        QLabel gmailEntryLabel;
-        QPalette uneditableTextLinePalette;
-        QLineEdit gmailEntryTextLine;
-        QLabel gmailAuthenticationPrompt;
-        QPushButton gmailAuthenticationButton;
-
         std::string oauthBearer;
         std::string gmail;
         bool verified = false;

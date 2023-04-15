@@ -28,11 +28,6 @@ class AccountTypeSelectionWizardPage : public QWizardPage {
     private:
         AddAccountWizard* addAccountWizard;
 
-        QGridLayout accountTypeSelectionLayout;
-        QLabel wizardIntroductionLabel;
-        QLabel accountTypePromptingLabel;
-        QGroupBox accountTypeSelectionGroupBox;
-        QVBoxLayout accountTypeSelectionGroupBoxLayout;
         std::vector<const QRadioButton*> accountTypeSelectionRadioButtons;
 
         static AccountManager::AccountVendor INITIAL_VENDOR_TYPE;
