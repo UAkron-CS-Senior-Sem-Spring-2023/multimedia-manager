@@ -14,5 +14,5 @@ const std::string& GmailAccountWithRecipients::name() const {
 
 void GmailAccountWithRecipients::send(const std::string& subject, const Request::MimeData& mimeData) const {
     auto headers = Request::SMTPHeaders(gmail(), subject, recipients_);
-    QRequest::singleton().gmailSMTP(QRequest::singleton().getNonUniqueRequest(), oauthBearer(), headers, mimeData);
+    QRequest::singleton().smtp(QRequest::getNonUniqueRequest(), QRequest::Constants::GMAIL_SMTP, oauthBearer(), headers, mimeData);
 }

@@ -4,6 +4,11 @@
 
 #include <curl/curl.h>
 
+#include "base64/include/base64.hpp"
+
+const char* Request::Constants::GMAIL_SMTP = "smtp://smtp.gmail.com:587";
+const char* Request::Constants::GMAIL_IMAP = "imaps://imap.gmail.com:993";
+
 Request::Request() {
     curl_global_init(CURL_GLOBAL_ALL);
     handle = curl_easy_init();
@@ -19,7 +24,7 @@ Request& Request::singleton() {
 }
 
 std::size_t Request::handleData(void* buffer, std::size_t size, std::size_t bufferLength, void* userData) {
-    data.append(static_cast<const char*>(buffer), bufferLength);
+    data->append(static_cast<const char*>(buffer), bufferLength);
     return bufferLength;
 }
 
@@ -31,14 +36,15 @@ std::string* Request::get(const std::string& url) {
     return singleton().getImpl(url);
 }
 std::string* Request::getImpl(const std::string& url) {
-    data.clear();
+    data = new std::string;
     curl_easy_setopt(handle, CURLOPT_URL, url.c_str());
     curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, handleDataStatic);
     auto status = curl_easy_perform(handle);
     if (status != CURLE_OK) {
+        delete data;
         return nullptr;
     } else {
-        return &data;
+        return data;
     }
 }
 
@@ -46,7 +52,7 @@ std::string* Request::authGet(const std::string& url, const std::string& oauthBe
     return singleton().authGetImpl(url, oauthBearer);
 }
 std::string* Request::authGetImpl(const std::string& url, const std::string& oauthBearer) {
-    data.clear();
+    data = new std::string;
     curl_easy_setopt(handle, CURLOPT_URL, url.c_str());
     curl_easy_setopt(handle, CURLOPT_XOAUTH2_BEARER, oauthBearer.c_str());
     curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, handleDataStatic);
@@ -54,9 +60,10 @@ std::string* Request::authGetImpl(const std::string& url, const std::string& oau
     curl_easy_setopt(handle, CURLOPT_USE_SSL, CURLUSESSL_ALL);
     auto status = curl_easy_perform(handle);
     if (status != CURLE_OK) {
+        delete data;
         return nullptr;
     } else {
-        return &data;
+        return data;
     }
 }
 
@@ -77,16 +84,17 @@ std::string* Request::post(const std::string& url, const std::unordered_map<std:
     return singleton().postImpl(url, postFields);
 }
 std::string* Request::postImpl(const std::string& url, const std::unordered_map<std::string, std::string>& postFields) {
-    data.clear();
+    data = new std::string;
     curl_easy_setopt(handle, CURLOPT_URL, url.c_str());
     curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, handleDataStatic);
     curl_easy_setopt(handle, CURLOPT_POSTFIELDS, postifyMappedValues(postFields).c_str());
 
     auto status = curl_easy_perform(handle);
     if (status != CURLE_OK) {
+        delete data;
         return nullptr;
     } else {
-        return &data;
+        return data;
     }
 }
 
@@ -104,6 +112,7 @@ std::string* Request::smtpImpl(
     const SMTPHeaders& headers,
     const MimeData& mimeData
 ) {
+    data = new std::string;
     curl_easy_setopt(handle, CURLOPT_URL, url.c_str());
     curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, handleDataStatic);
     curl_easy_setopt(handle, CURLOPT_USERNAME, headers.curlMailFrom().c_str());
@@ -117,31 +126,61 @@ std::string* Request::smtpImpl(
 
     auto status = curl_easy_perform(handle);
     if (status != CURLE_OK) {
+        delete data;
         return nullptr;
     } else {
-        return &data;
+        return data;
     }
 }
 
-std::string* Request::imap(const std::string& url, const std::string& oauthBearer, const std::string& imapCommands) {
-    return singleton().imapImpl(url, oauthBearer, imapCommands);
+std::string* Request::imap(const std::string& url, const std::string& user, const std::string& imapCommands) {
+    return singleton().imapImpl(url, user, imapCommands);
 }
-std::string* Request::imapImpl(const std::string& url, const std::string& oauthBearer, const std::string& imapCommands) {
-    curl_easy_setopt(handle, CURLOPT_URL, url.c_str());
-    curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, handleDataStatic);
-    curl_easy_setopt(handle, CURLOPT_XOAUTH2_BEARER, oauthBearer.c_str());
-    if (imapCommands != "") {
-        curl_easy_setopt(handle, CURLOPT_CUSTOMREQUEST, imapCommands.c_str());
-    }
 
-    auto status = curl_easy_perform(handle);
+#include <iostream>
+std::string* Request::imapImpl(const std::string& url, const std::string& user, const std::string& imapCommands) {
+    data = new std::string;
+    if (imapConnectionHandles.count(url) == 0) {
+        imapConnectionHandles[url] = std::unordered_map<std::string, CURL*>();
+    }
+    if (imapConnectionHandles.at(url).count(user) == 0) {
+        imapConnectionHandles.at(url)[user] = curl_easy_init();
+    }
+    CURL* imapHandle = imapConnectionHandles.at(url).at(user);
+    curl_easy_setopt(imapHandle, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(imapHandle, CURLOPT_WRITEFUNCTION, handleDataStatic);
+    curl_easy_setopt(imapHandle, CURLOPT_CUSTOMREQUEST, imapCommands.c_str());
+    curl_easy_setopt(imapHandle, CURLOPT_USE_SSL, CURLUSESSL_ALL);
+    curl_easy_setopt(imapHandle, CURLOPT_SSL_VERIFYPEER, 0L);
+    curl_easy_setopt(imapHandle, CURLOPT_VERBOSE, 1L);
+
+    auto status = curl_easy_perform(imapHandle);
     if (status != CURLE_OK) {
+        delete data;
         return nullptr;
     } else {
-        return &data;
+        return data;
     }
 }
 
+std::string* Request::authIMAP(const std::string& url, const std::string& user, const std::string& oauthBearer) {
+    return singleton().authIMAPImpl(url, user, oauthBearer);
+}
+std::string* Request::authIMAPImpl(const std::string& url, const std::string& user, const std::string& oauthBearer) {
+    if (imapAuthenticatedUsers.count(url) != 0 && imapAuthenticatedUsers.at(url).count(user) != 0) {
+        return new std::string("Preauthenticated");
+    }
+    if (imapAuthenticatedUsers.count(url) == 0) {
+        imapAuthenticatedUsers[url] = std::unordered_set<std::string>();
+    }
+
+    std::string authCommand = std::string("AUTHENTICATE XOAUTH2 ") + base64::to_base64(std::string("user=") + user + "\x01" "auth=Bearer " + oauthBearer + "\x01\x01");
+    auto* response = imapImpl(url, user, authCommand);
+    if (response != nullptr) {
+        imapAuthenticatedUsers[url].insert(user);
+    }
+    return response;
+}
 Request::SMTPHeaders::~SMTPHeaders() {
     curl_slist_free_all(curlMailRecipients_);
     curl_slist_free_all(curlHeaders_);

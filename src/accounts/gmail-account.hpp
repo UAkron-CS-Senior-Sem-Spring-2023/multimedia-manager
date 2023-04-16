@@ -4,7 +4,7 @@
 
 class GmailAccount;
 
-class GmailInbox : public Inbox {
+class GmailInbox : public Inbox, public QObject {
     public:
         class iterator : public Inbox::iterator {
             public:
@@ -19,12 +19,12 @@ class GmailInbox : public Inbox {
                 typename std::vector<Request::MimeData>::const_iterator messageIterator;
         };
 
-        GmailInbox(GmailAccount* account);
+        GmailInbox(GmailAccount* account, QObject* parent = nullptr);
 
         std::unique_ptr<Inbox::iterator> begin() const override;
         std::unique_ptr<Inbox::iterator> end() const override;
 
-        void populate() override;
+        void populate() const override;
     private:
         GmailAccount* account;
         std::vector<Request::MimeData> messages;

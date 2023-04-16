@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include <unordered_set>
 #include <unordered_map>
 
 #include <curl/curl.h>
@@ -19,6 +20,12 @@ struct ImplRequest {
 
 class Request {
     public:
+        class Constants {
+            public:
+                static const char* GMAIL_SMTP;
+                static const char* GMAIL_IMAP;
+        };
+
         class SMTPHeaders {
             public:
                 template <class ToRecipientsContainer>
@@ -129,7 +136,8 @@ class Request {
             const MimeData& mimeData
         );
 
-        static std::string* imap(const std::string& url, const std::string& oauthBearer, const std::string& imapCommands = "");
+        static std::string* imap(const std::string& url, const std::string& user, const std::string& imapCommands = "CAPABILITY");
+        static std::string* authIMAP(const std::string& url, const std::string& user, const std::string& oauthBearer);
     private:
         std::string* getImpl(const std::string& url);
         std::string* authGetImpl(const std::string& url, const std::string& oauthBearer);
@@ -137,7 +145,7 @@ class Request {
         std::string* postImpl(const std::string& url, const std::unordered_map<std::string, std::string>& postFields);
         template <class PostFieldIterable>
         std::string* postImpl(const std::string& url, const PostFieldIterable& postFieldss) {
-            data.clear();
+            data = new std::string;
             curl_easy_setopt(handle, CURLOPT_URL, url.c_str());
             curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, handleDataStatic);
 
@@ -156,7 +164,7 @@ class Request {
             if (status != CURLE_OK) {
                 return nullptr;
             } else {
-                return &data;
+                return data;
             }
         }
         
@@ -167,12 +175,16 @@ class Request {
             const MimeData& mimeData
         );
 
-        std::string* imapImpl(const std::string& url, const std::string& oauthBearer, const std::string& imapCommands = "");
+        std::string* imapImpl(const std::string& url, const std::string& user, const std::string& imapCommands = "");
+        std::string* authIMAPImpl(const std::string& url, const std::string& user, const std::string& oauthBearer);
 
         static Request& singleton();
 
         CURL* handle;
-        std::string data;
+        std::unordered_map<std::string, std::unordered_map<std::string, CURL*>> imapConnectionHandles;
+        std::unordered_map<std::string, std::unordered_set<std::string>> imapAuthenticatedUsers;
+        std::string* data;
+        std::string err;
         std::size_t handleData(void* buffer, std::size_t size, std::size_t bufferLength, void* userData);
         static std::size_t handleDataStatic(void* buffer, std::size_t size, std::size_t bufferLength, void* userData);
 

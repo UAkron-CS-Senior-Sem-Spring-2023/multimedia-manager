@@ -28,5 +28,5 @@ class Inbox {
         virtual std::unique_ptr<iterator> begin() const = 0;
         virtual std::unique_ptr<iterator> end() const = 0;
 
-        virtual void populate() = 0;
+        virtual void populate() const = 0;
 };

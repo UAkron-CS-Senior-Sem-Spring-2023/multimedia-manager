@@ -58,10 +58,13 @@ void QRequest::smtp(
 void QRequest::imap(
     std::size_t request,
     const std::string& url,
-    const std::string& oauthBearer,
+    const std::string& user,
     const std::string& imapCommands
 ) {
-    emit onResponse(request, Request::imap(url, oauthBearer, imapCommands));
+    emit onResponse(request, Request::imap(url, user, imapCommands));
+}
+void QRequest::authIMAP(std::size_t request, const std::string& url, const std::string& user, const std::string& oauthBearer) {
+    emit onResponse(request, Request::authIMAP(url, user, oauthBearer));
 }
 
 void QRequest::gmailGetUser(
@@ -88,7 +91,7 @@ void QRequest::gmailOAuth(std::size_t request) {
     auto* googleOAuth = new QOAuth2AuthorizationCodeFlow(this);
     googleOAuth->setScope("https://mail.google.com/");
 
-    auto* replyHandler = new QOAuthHttpServerReplyHandler(20289, this);
+    auto* replyHandler = new QOAuthHttpServerReplyHandler(1634, this);
 
     auto disconnectAll = [googleOAuth, replyHandler, timeoutOAuth]() {
         disconnect(googleOAuth, nullptr, nullptr, nullptr);
@@ -137,13 +140,4 @@ void QRequest::gmailOAuth(std::size_t request) {
     });
     // 5 minute time to authenticate
     timeoutOAuth->start(300000);
-}
-
-void QRequest::gmailSMTP(
-    std::size_t request,
-    const std::string& oauthBearer,
-    const SMTPHeaders& headers,
-    const MimeData& mimeData
-) {
-    emit onResponse(request, Request::smtp("smtp://smtp.gmail.com:587", oauthBearer, headers, mimeData));
 }

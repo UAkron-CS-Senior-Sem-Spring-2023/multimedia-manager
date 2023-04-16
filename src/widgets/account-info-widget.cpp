@@ -2,8 +2,6 @@
 
 #include "main-window.hpp"
 
-#include <iostream>
-
 AccountInfoWidget::AccountInfoWidget(MainWindow* mainWindow, QWidget* parent)
     : QWidget(parent),
     mainWindow(mainWindow)
@@ -104,7 +102,7 @@ AccountInfoWidget::AccountInfoWidget(MainWindow* mainWindow, QWidget* parent)
     connect(&accountSendMessageWizard, &SendMessageWizard::gotMessage, [this](std::string subject, Request::MimeData mimeData) {
         dynamic_cast<const RecipientAccount*>(this->mainWindow->selectedAccount())->send(std::move(subject), std::move(mimeData));
     });
-    connect(managingAccountSendMessageButton, &QPushButton::clicked, [this](){
+    connect(managingAccountSendMessageButton, &QPushButton::clicked, [this]() {
         accountSendMessageWizard.show();
     });
     connect(mainWindow, &MainWindow::selectedAccountChanged, [this](){
@@ -115,6 +113,10 @@ AccountInfoWidget::AccountInfoWidget(MainWindow* mainWindow, QWidget* parent)
 
     auto* managingAccountViewInboxButton = new QPushButton(tr("View inbox"));
     managingAccountViewInboxButton->setEnabled(false);
+    connect(managingAccountViewInboxButton, &QPushButton::clicked, [this]() {
+        dynamic_cast<const SourceAccount*>(this->mainWindow->selectedAccount())->inbox().populate();
+    });
+
     managingAccountActionButtonsLayout->addWidget(managingAccountViewInboxButton);
     connect(mainWindow, &MainWindow::selectedAccountSourceRecipientTypeChanged, [this, managingAccountSendMessageButton, managingAccountViewInboxButton](AccountManager::SourceRecipientType sourceRecipientType){
         // enable the button only if the account is capable of sending
@@ -132,7 +134,6 @@ AccountInfoWidget::AccountInfoWidget(MainWindow* mainWindow, QWidget* parent)
     managingAccountGroupSendMessageButton->setEnabled(false);
     connect(&accountGroupSendMessageWizard, &SendMessageWizard::gotMessage, [this](std::string subject, Request::MimeData mimeData) {
         for (const auto* account : *this->mainWindow->selectedAccountGroup()) {
-            std::cout << "sent on " << account->name() << std::endl;
             dynamic_cast<const RecipientAccount*>(account)->send(std::move(subject), std::move(mimeData));
         }
     });

@@ -2,8 +2,6 @@
 
 #include "main-window.hpp"
 
-#include <iostream>
-
 AccountsWidget::AccountsWidget(MainWindow* mainWindow, QWidget* parent)
     : QWidget(parent),
     mainWindow(mainWindow)
