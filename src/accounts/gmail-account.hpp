@@ -38,7 +38,7 @@ class GmailInbox : public Inbox {
 
 class GmailAccount : public virtual SourceAccount, public QObject {
     public:
-        GmailAccount(std::string gmail, std::string oauthBearer, QObject* parent = nullptr);
+        GmailAccount(std::string gmail, std::string oauthBearer, std::string refreshToken, QObject* parent = nullptr);
 
         const std::string& name() const override;
         QWidget& info() const override;
@@ -46,11 +46,13 @@ class GmailAccount : public virtual SourceAccount, public QObject {
 
         const std::string& gmail() const;
         const std::string& oauthBearer() const;
+        const std::string& refreshToken() const;
 
     private:
         std::string name_;
         std::string gmail_;
         std::string oauthBearer_;
+        std::string refreshToken_;
 
         GmailInbox inbox_;
 

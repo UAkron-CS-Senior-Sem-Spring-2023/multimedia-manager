@@ -5,6 +5,7 @@
 
 #include "accounts/gmail-account.hpp"
 
+#include <iostream>
 
 AddGmailAccountPage::AddGmailAccountPage(AddAccountWizard* addAccountWizard, QWidget* parent)
     : ValidatableAddAccountPage(parent),
@@ -38,6 +39,7 @@ AddGmailAccountPage::AddGmailAccountPage(AddAccountWizard* addAccountWizard, QWi
     addGmailAccountPageLayout->addWidget(gmailAuthenticationPrompt, workingRow++, 0);
 
     std::size_t authRequest = QRequest::singleton().getUniqueRequest();
+    std::size_t refreshTokenRequest = QRequest::singleton().getUniqueRequest();
     std::size_t verifyRequest = QRequest::singleton().getUniqueRequest();
 
     connect(addAccountWizard, &AddAccountWizard::finished, [this, gmailEntryTextLine](){
@@ -54,26 +56,34 @@ AddGmailAccountPage::AddGmailAccountPage(AddAccountWizard* addAccountWizard, QWi
 
         gmailEntryTextLine->setText(QString::fromStdString(gmail));
         addAccountWizard->clearAccountsToAdd();
-        addAccountWizard->addSourceAccountToAdd(std::unique_ptr<SourceAccount>(new GmailAccount(gmail, oauthBearer)));
+        addAccountWizard->addSourceAccountToAdd(std::unique_ptr<SourceAccount>(new GmailAccount(gmail, oauthBearer, refreshToken)));
 
         verified = true;
         emit completeChanged();
     });
 
-    connect(&QRequest::singleton(), &QRequest::onResponse, [this, authRequest, verifyRequest](std::size_t requestProvided, std::string* response) {
+    connect(&QRequest::singleton(), &QRequest::onResponse, [this, refreshTokenRequest, verifyRequest](std::size_t requestProvided, std::string* response) {
+        if (refreshTokenRequest != requestProvided || response == nullptr) {
+            return;
+        }
+        refreshToken = std::string(*response);
+        std::cout << refreshToken << std::endl;
+        delete response;
+
+        QRequest::singleton().gmailGetUser(verifyRequest, oauthBearer);
+    });
+    connect(&QRequest::singleton(), &QRequest::onResponse, [this, authRequest](std::size_t requestProvided, std::string* response) {
         if (authRequest != requestProvided || response == nullptr) {
             return;
         }
         oauthBearer = std::string(*response);
         delete response;
-
-        QRequest::singleton().gmailGetUser(verifyRequest, oauthBearer);
     });
 
     auto* gmailAuthenticationButton = new QPushButton(tr("Authenticate"));
-    connect(gmailAuthenticationButton, &QPushButton::clicked, [this, gmailEntryTextLine, authRequest](){
+    connect(gmailAuthenticationButton, &QPushButton::clicked, [this, gmailEntryTextLine, authRequest, refreshTokenRequest](){
         gmail = gmailEntryTextLine->text().toStdString();
-        QRequest::singleton().gmailOAuth(authRequest);
+        QRequest::singleton().gmailOAuth(authRequest, refreshTokenRequest);
     });
 
     addGmailAccountPageLayout->addWidget(gmailAuthenticationButton, workingRow++, 0);

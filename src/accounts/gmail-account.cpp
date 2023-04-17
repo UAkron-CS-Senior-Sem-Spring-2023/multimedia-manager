@@ -61,8 +61,8 @@ void GmailInbox::populate() const {
     QRequest::singleton().gmailGetUnparsedMails(getEmailsRequest, account->gmail(), account->oauthBearer());
 }
 
-GmailAccount::GmailAccount(std::string gmail, std::string oauthBearer, QObject* parent)
-    : QObject(parent), name_(gmail), gmail_(gmail), oauthBearer_(oauthBearer), inbox_(GmailInbox(this))
+GmailAccount::GmailAccount(std::string gmail, std::string oauthBearer, std::string refreshToken, QObject* parent)
+    : QObject(parent), name_(gmail), gmail_(gmail), oauthBearer_(oauthBearer), refreshToken_(refreshToken), inbox_(GmailInbox(this))
 {
     QGridLayout* infoLayout = new QGridLayout(&infoWidget);
     int workingRow = 0;
@@ -101,6 +101,10 @@ const std::string& GmailAccount::gmail() const {
 
 const std::string& GmailAccount::oauthBearer() const {
     return oauthBearer_;
+}
+
+const std::string& GmailAccount::refreshToken() const {
+    return refreshToken_;
 }
 
 const GmailInbox& GmailAccount::inbox() const {

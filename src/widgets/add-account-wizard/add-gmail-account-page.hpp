@@ -20,6 +20,7 @@ class AddGmailAccountPage : public ValidatableAddAccountPage {
         AddAccountWizard* addAccountWizard;
 
         std::string oauthBearer;
+        std::string refreshToken;
         std::string gmail;
         bool verified = false;
 };

@@ -90,7 +90,7 @@ void QRequest::gmailGetUser(
     emit onResponse(request, new std::string(jsonResponse.at("emailAddress")));
 }
 
-void QRequest::gmailOAuth(std::size_t request) {
+void QRequest::gmailOAuth(std::size_t requestAuthToken, std::size_t requestRefreshToken) {
     // this actually must be new, if otherwise it will go out of scope
     auto* timeoutOAuth = new QTimer();
 
@@ -109,10 +109,9 @@ void QRequest::gmailOAuth(std::size_t request) {
     };
 
     connect(googleOAuth, &QOAuth2AuthorizationCodeFlow::authorizeWithBrowser, &QDesktopServices::openUrl);
-    connect(googleOAuth, &QOAuth2AuthorizationCodeFlow::granted, [this, request, googleOAuth, disconnectAll]() {
-        std::string* oauthToken = new std::string(googleOAuth->token().toStdString());
-        emit onResponse(request, oauthToken);
-
+    connect(googleOAuth, &QOAuth2AuthorizationCodeFlow::granted, [this, requestAuthToken, requestRefreshToken, googleOAuth, disconnectAll]() {
+        emit onResponse(requestAuthToken, new std::string(googleOAuth->token().toStdString()));
+        emit onResponse(requestRefreshToken, new std::string(googleOAuth->refreshToken().toStdString()));
         disconnectAll();
     });
 
@@ -139,8 +138,9 @@ void QRequest::gmailOAuth(std::size_t request) {
     googleOAuth->grant();
 
     timeoutOAuth->setSingleShot(true);
-    connect(timeoutOAuth, &QTimer::timeout, [this, request, disconnectAll](){
-        emit onResponse(request, nullptr);
+    connect(timeoutOAuth, &QTimer::timeout, [this, requestAuthToken, requestRefreshToken, disconnectAll](){
+        emit onResponse(requestAuthToken, nullptr);
+        emit onResponse(requestRefreshToken, nullptr);
 
         disconnectAll();
     });

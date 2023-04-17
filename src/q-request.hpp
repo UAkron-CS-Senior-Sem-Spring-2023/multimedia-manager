@@ -32,9 +32,7 @@ class QRequest : public QObject {
         void imap(std::size_t request, const std::string& url, const std::string& user, const std::string& imapCommands = "CAPABILITY");
         void authIMAP(std::size_t request, const std::string& url, const std::string& user, const std::string& oauthBearer);
         
-        void gmailOAuth(
-            std::size_t request
-        );
+        void gmailOAuth(std::size_t requestAuthToken, std::size_t requestRefreshToken);
 
         void gmailGetUser(
             std::size_t request,

@@ -3,7 +3,7 @@
 #include "q-request.hpp"
 
 GmailAccountWithRecipients::GmailAccountWithRecipients(const GmailAccount& gmailAccount, std::list<std::string> recipients, QObject* parent)
-    : GmailAccount(gmailAccount.gmail(), gmailAccount.oauthBearer(), parent), recipients_(std::move(recipients))
+    : GmailAccount(gmailAccount.gmail(), gmailAccount.oauthBearer(), gmailAccount.refreshToken(), parent), recipients_(std::move(recipients))
 {
     name_ = gmailAccount.gmail() + " with " + std::to_string(recipients_.size()) + " recipients";
 }
