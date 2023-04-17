@@ -4,6 +4,8 @@
 
 #include <QObject>
 
+#include "accounts/inbox.hpp"
+
 class QRequest : public QObject {
     Q_OBJECT
 
@@ -38,6 +40,13 @@ class QRequest : public QObject {
             std::size_t request,
             const std::string& oauthBearer
         );
+        
+        void gmailGetUnparsedMails(
+            std::size_t request,
+            const std::string& user,
+            const std::string& oauthBearer
+        );
+        static std::map<Inbox::Info, std::string> gmailParseMails(std::string_view emailsString, const std::string& user);
     signals:
         void onResponse(std::size_t request, std::string* response);
 

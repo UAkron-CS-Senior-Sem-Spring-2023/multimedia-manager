@@ -4,19 +4,19 @@
 
 class GmailAccount;
 
-class GmailInbox : public Inbox, public QObject {
+class GmailInbox : public Inbox {
     public:
         class iterator : public Inbox::iterator {
             public:
-                iterator(typename std::vector<Request::MimeData>::const_iterator messageIterator);
+                iterator(typename std::map<Info, std::string>::const_iterator messageIterator);
 
-                const_reference operator*() const override;
+                value_type operator*() const override;
                 Inbox::iterator& operator++() override;
                 std::unique_ptr<Inbox::iterator> operator++(int) override;
                 bool operator==(const Inbox::iterator& other) const override;
                 bool operator!=(const Inbox::iterator& other) const override;
             private:
-                typename std::vector<Request::MimeData>::const_iterator messageIterator;
+                typename std::map<Inbox::Info, std::string>::const_iterator messageIterator;
         };
 
         GmailInbox(GmailAccount* account, QObject* parent = nullptr);
@@ -27,7 +27,7 @@ class GmailInbox : public Inbox, public QObject {
         void populate() const override;
     private:
         GmailAccount* account;
-        std::vector<Request::MimeData> messages;
+        mutable std::map<Inbox::Info, std::string> messages;
 };
 
 #include <QWidget>

@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "send-message-wizard.hpp"
+#include "view-inbox-dialog.hpp"
 
 class MainWindow;
 
@@ -26,4 +27,5 @@ class AccountInfoWidget : public QWidget {
 
         SendMessageWizard accountSendMessageWizard;
         SendMessageWizard accountGroupSendMessageWizard;
+        ViewInboxDialog viewInboxDialog;
 };

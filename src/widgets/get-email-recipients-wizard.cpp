@@ -1,6 +1,10 @@
 #include "get-email-recipients-wizard.hpp"
 
 #include <QPalette>
+#include <QGridLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QScrollArea>
 
 GetEmailRecipientsWizard::GetEmailRecipientsWizard(QWidget* parent)
     : QWizard(parent)

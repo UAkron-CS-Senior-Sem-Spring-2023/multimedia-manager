@@ -5,10 +5,10 @@
 #include "q-request.hpp"
 
 GmailInbox::GmailInbox(GmailAccount* account, QObject* parent)
-    : QObject(parent), account(account)
+    : Inbox(parent), account(account)
 {}
 
-GmailInbox::iterator::iterator(typename std::vector<Request::MimeData>::const_iterator messageIterator)
+GmailInbox::iterator::iterator(typename std::map<Info, std::string>::const_iterator messageIterator)
     : messageIterator(messageIterator)
 {}
 
@@ -22,7 +22,7 @@ std::unique_ptr<Inbox::iterator> GmailInbox::iterator::operator++(int) {
     return iterator;
 }
 
-typename Inbox::iterator::const_reference GmailInbox::iterator::operator*() const {
+typename Inbox::iterator::value_type GmailInbox::iterator::operator*() const {
     return *messageIterator;
 }
 
@@ -40,42 +40,25 @@ std::unique_ptr<Inbox::iterator> GmailInbox::end() const {
     return std::unique_ptr<Inbox::iterator>(new GmailInbox::iterator(messages.end()));
 }
 
-#include <iostream>
-
 void GmailInbox::populate() const {
-    std::size_t authRequest = QRequest::singleton().getUniqueRequest();
-    std::size_t listRequest = QRequest::singleton().getUniqueRequest();
-    auto authConnection = std::make_unique<QMetaObject::Connection>(); 
-    *authConnection = connect(&QRequest::singleton(), &QRequest::onResponse, this, [this, authRequest, &authConnection, listRequest](std::size_t requestProvided, std::string* response) {
-        if (requestProvided != authRequest) {
+    std::size_t getEmailsRequest = QRequest::singleton().getUniqueRequest();
+
+    auto* getEmailsConnection = new QMetaObject::Connection;
+    *getEmailsConnection = connect(&QRequest::singleton(), &QRequest::onResponse, [this, getEmailsRequest, getEmailsConnection](std::size_t requestProvided, std::string* response) {
+        if (requestProvided != getEmailsRequest) {
             return;
         }
+        disconnect(*getEmailsConnection);
+        delete getEmailsConnection;
         if (response == nullptr) {
-            std::cout << "Warning: got response nullptr from GmailInbox population" << std::endl;
             return;
         }
-        std::cout << *response << std::endl;
+
+        messages = QRequest::gmailParseMails(*response, account->gmail());
+        emit populatedInbox(this);
         delete response;
-        QRequest::singleton().imap(listRequest, QRequest::Constants::GMAIL_IMAP, account->gmail(), "LIST \"\" %");
-
-        disconnect(*authConnection);
     });
-
-    auto listConnection = std::make_unique<QMetaObject::Connection>();
-    *listConnection = connect(&QRequest::singleton(), &QRequest::onResponse, this, [this, listRequest, &listConnection](std::size_t requestProvided, std::string* response) {
-        if (requestProvided != listRequest) {
-            return;
-        }
-        if (response == nullptr) {
-            std::cout << "Warning: got response nullptr from GmailInbox population" << std::endl;
-            return;
-        }
-        std::cout << *response << std::endl;
-        delete response;
-
-        disconnect(*listConnection);
-    });
-    QRequest::singleton().authIMAP(authRequest, QRequest::Constants::GMAIL_IMAP, account->gmail(), account->oauthBearer());
+    QRequest::singleton().gmailGetUnparsedMails(getEmailsRequest, account->gmail(), account->oauthBearer());
 }
 
 GmailAccount::GmailAccount(std::string gmail, std::string oauthBearer, QObject* parent)

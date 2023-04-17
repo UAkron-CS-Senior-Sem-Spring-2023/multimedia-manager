@@ -24,12 +24,16 @@ Request& Request::singleton() {
 }
 
 std::size_t Request::handleData(void* buffer, std::size_t size, std::size_t bufferLength, void* userData) {
-    data->append(static_cast<const char*>(buffer), bufferLength);
-    return bufferLength;
+    data->append(static_cast<const char*>(buffer), bufferLength * size);
+    return bufferLength * size;
 }
 
 std::size_t Request::handleDataStatic(void* buffer, std::size_t size, std::size_t bufferLength, void* userData) {
     return Request::singleton().handleData(buffer, size, bufferLength, userData);
+}
+
+std::size_t Request::voidData(void* buffer, std::size_t size, std::size_t bufferLength, void* userData) {
+    return bufferLength * size;
 }
 
 std::string* Request::get(const std::string& url) {
@@ -137,7 +141,6 @@ std::string* Request::imap(const std::string& url, const std::string& user, cons
     return singleton().imapImpl(url, user, imapCommands);
 }
 
-#include <iostream>
 std::string* Request::imapImpl(const std::string& url, const std::string& user, const std::string& imapCommands) {
     data = new std::string;
     if (imapConnectionHandles.count(url) == 0) {
@@ -148,11 +151,11 @@ std::string* Request::imapImpl(const std::string& url, const std::string& user, 
     }
     CURL* imapHandle = imapConnectionHandles.at(url).at(user);
     curl_easy_setopt(imapHandle, CURLOPT_URL, url.c_str());
-    curl_easy_setopt(imapHandle, CURLOPT_WRITEFUNCTION, handleDataStatic);
+    curl_easy_setopt(imapHandle, CURLOPT_WRITEFUNCTION, voidData);
+    curl_easy_setopt(imapHandle, CURLOPT_HEADERFUNCTION, handleDataStatic);
     curl_easy_setopt(imapHandle, CURLOPT_CUSTOMREQUEST, imapCommands.c_str());
     curl_easy_setopt(imapHandle, CURLOPT_USE_SSL, CURLUSESSL_ALL);
     curl_easy_setopt(imapHandle, CURLOPT_SSL_VERIFYPEER, 0L);
-    curl_easy_setopt(imapHandle, CURLOPT_VERBOSE, 1L);
 
     auto status = curl_easy_perform(imapHandle);
     if (status != CURLE_OK) {

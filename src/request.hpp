@@ -187,6 +187,7 @@ class Request {
         std::string err;
         std::size_t handleData(void* buffer, std::size_t size, std::size_t bufferLength, void* userData);
         static std::size_t handleDataStatic(void* buffer, std::size_t size, std::size_t bufferLength, void* userData);
+        static std::size_t voidData(void* buffer, std::size_t size, std::size_t bufferLength, void* userData);
 
         Request();
 };

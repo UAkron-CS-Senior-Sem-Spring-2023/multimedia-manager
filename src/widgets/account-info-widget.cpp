@@ -111,10 +111,15 @@ AccountInfoWidget::AccountInfoWidget(MainWindow* mainWindow, QWidget* parent)
     managingAccountActionButtonsLayout->addWidget(managingAccountSendMessageButton);
     managingAccountActionButtonsLayout->addStretch(1);
 
+    connect(&viewInboxDialog, &ViewInboxDialog::allInboxesPopulated, [this](){
+        viewInboxDialog.show();
+    });
+
     auto* managingAccountViewInboxButton = new QPushButton(tr("View inbox"));
     managingAccountViewInboxButton->setEnabled(false);
     connect(managingAccountViewInboxButton, &QPushButton::clicked, [this]() {
-        dynamic_cast<const SourceAccount*>(this->mainWindow->selectedAccount())->inbox().populate();
+        viewInboxDialog.setInbox(&dynamic_cast<const SourceAccount*>(this->mainWindow->selectedAccount())->inbox());
+        viewInboxDialog.populateInboxes();
     });
 
     managingAccountActionButtonsLayout->addWidget(managingAccountViewInboxButton);
@@ -148,6 +153,13 @@ AccountInfoWidget::AccountInfoWidget(MainWindow* mainWindow, QWidget* parent)
 
     auto* managingAccountGroupViewInboxButton = new QPushButton(tr("View inbox"));
     managingAccountGroupViewInboxButton->setEnabled(false);
+    connect(managingAccountGroupViewInboxButton, &QPushButton::clicked, [this]() {
+        viewInboxDialog.clearInboxes();
+        for (const auto* account : *this->mainWindow->selectedAccountGroup()) {
+            viewInboxDialog.addInbox(&dynamic_cast<const SourceAccount*>(account)->inbox());
+        }
+        viewInboxDialog.populateInboxes();
+    });
     connect(mainWindow, &MainWindow::selectedAccountGroupSourceRecipientTypeChanged, [this, managingAccountGroupSendMessageButton, managingAccountGroupViewInboxButton](AccountManager::SourceRecipientType sourceRecipientType) {
         // enable the button only if the account is capable of sending
         managingAccountGroupSendMessageButton->setEnabled(sourceRecipientType == AccountManager::RECIPIENT || sourceRecipientType == AccountManager::DUAL);

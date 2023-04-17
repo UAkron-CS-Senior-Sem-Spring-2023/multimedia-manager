@@ -4,6 +4,7 @@ target_sources(MultimediaManager
     PUBLIC account-info-widget.cpp
     PUBLIC get-email-recipients-wizard.cpp
     PUBLIC send-message-wizard.cpp
+    PUBLIC view-inbox-dialog.cpp
 
     PUBLIC add-account-group-wizard.cpp
 )

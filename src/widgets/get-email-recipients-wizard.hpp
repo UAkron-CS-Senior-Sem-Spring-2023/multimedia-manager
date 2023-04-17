@@ -5,10 +5,6 @@
 #include <unordered_set>
 
 #include <QWizard>
-#include <QGridLayout>
-#include <QScrollArea>
-#include <QLabel>
-#include <QLineEdit>
 #include <QPushButton>
 
 class GetEmailRecipientsWizard : public QWizard {
