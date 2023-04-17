@@ -90,38 +90,58 @@ void QRequest::gmailGetUser(
     emit onResponse(request, new std::string(jsonResponse.at("emailAddress")));
 }
 
-void QRequest::gmailOAuth(std::size_t requestAuthToken, std::size_t requestRefreshToken) {
+void QRequest::refreshAuthToken(
+    std::size_t request,
+    const std::string& authorizationUrl,
+    const std::string& clientId,
+    const std::string& clientSecret,
+    const std::string& refreshToken
+) {
+    emit onResponse(request, Request::post(authorizationUrl, {
+        {"client_id", clientId},
+        {"client_secret", clientSecret},
+        {"refresh_token", refreshToken}
+    }));
+}
+
+void QRequest::oauth2(
+    std::size_t requestAuthToken,
+    std::size_t requestRefreshToken,
+    const std::string& scope,
+    const std::string& authorizationUrl,
+    const std::string& accessTokenUrl,
+    const std::string& clientId,
+    const std::string& clientSecret
+) {
     // this actually must be new, if otherwise it will go out of scope
     auto* timeoutOAuth = new QTimer();
 
-    auto* googleOAuth = new QOAuth2AuthorizationCodeFlow(this);
-    googleOAuth->setScope("https://mail.google.com/");
+    auto* oauth = new QOAuth2AuthorizationCodeFlow(this);
+    oauth->setScope(QString::fromStdString(scope));
 
     auto* replyHandler = new QOAuthHttpServerReplyHandler(1634, this);
 
-    auto disconnectAll = [googleOAuth, replyHandler, timeoutOAuth]() {
-        disconnect(googleOAuth, nullptr, nullptr, nullptr);
+    auto disconnectAll = [oauth, replyHandler, timeoutOAuth]() {
+        disconnect(oauth, nullptr, nullptr, nullptr);
         disconnect(replyHandler, nullptr, nullptr, nullptr);
         disconnect(timeoutOAuth, nullptr, nullptr, nullptr);
-        delete googleOAuth;
+        delete oauth;
         delete replyHandler;
         delete timeoutOAuth;
     };
 
-    connect(googleOAuth, &QOAuth2AuthorizationCodeFlow::authorizeWithBrowser, &QDesktopServices::openUrl);
-    connect(googleOAuth, &QOAuth2AuthorizationCodeFlow::granted, [this, requestAuthToken, requestRefreshToken, googleOAuth, disconnectAll]() {
-        emit onResponse(requestAuthToken, new std::string(googleOAuth->token().toStdString()));
-        emit onResponse(requestRefreshToken, new std::string(googleOAuth->refreshToken().toStdString()));
+    connect(oauth, &QOAuth2AuthorizationCodeFlow::authorizeWithBrowser, &QDesktopServices::openUrl);
+    connect(oauth, &QOAuth2AuthorizationCodeFlow::granted, [this, requestAuthToken, requestRefreshToken, oauth, disconnectAll]() {
+        emit onResponse(requestAuthToken, new std::string(oauth->token().toStdString()));
+        emit onResponse(requestRefreshToken, new std::string(oauth->refreshToken().toStdString()));
         disconnectAll();
     });
 
-    const QString CLIENT_ID = "358961584307-33g6eh5pqrr5t7snk8ta9qqejmtmt8kp.apps.googleusercontent.com";
-    const QString CLIENT_SECRET = "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";
-    googleOAuth->setAuthorizationUrl(QUrl("https://accounts.google.com/o/oauth2/auth"));
-    googleOAuth->setClientIdentifier(CLIENT_ID);
-    googleOAuth->setAccessTokenUrl(QUrl("https://oauth2.googleapis.com/token"));
-    googleOAuth->setClientIdentifierSharedKey(CLIENT_SECRET);
-    googleOAuth->setModifyParametersFunction([](QAbstractOAuth::Stage stage, QMultiMap<QString, QVariant>* parameters) {
+    oauth->setAuthorizationUrl(QUrl(QString::fromStdString(authorizationUrl)));
+    oauth->setAccessTokenUrl(QUrl(QString::fromStdString(accessTokenUrl)));
+    oauth->setClientIdentifier(QString::fromStdString(clientId));
+    oauth->setClientIdentifierSharedKey(QString::fromStdString(clientSecret));
+    oauth->setModifyParametersFunction([](QAbstractOAuth::Stage stage, QMultiMap<QString, QVariant>* parameters) {
         // Percent-decode the "code" parameter so Google can match it
         if (stage == QAbstractOAuth::Stage::RequestingAccessToken) {
             auto codes = parameters->values("code");
@@ -134,8 +154,8 @@ void QRequest::gmailOAuth(std::size_t requestAuthToken, std::size_t requestRefre
         }
     });
 
-    googleOAuth->setReplyHandler(replyHandler);
-    googleOAuth->grant();
+    oauth->setReplyHandler(replyHandler);
+    oauth->grant();
 
     timeoutOAuth->setSingleShot(true);
     connect(timeoutOAuth, &QTimer::timeout, [this, requestAuthToken, requestRefreshToken, disconnectAll](){
@@ -146,6 +166,18 @@ void QRequest::gmailOAuth(std::size_t requestAuthToken, std::size_t requestRefre
     });
     // 5 minute time to authenticate
     timeoutOAuth->start(300000);
+}
+
+void QRequest::gmailOAuth(std::size_t requestAuthToken, std::size_t requestRefreshToken) {
+    oauth2(
+        requestAuthToken,
+        requestRefreshToken,
+        "https://mail.google.com/",
+        "https://accounts.google.com/o/oauth2/auth",
+        "https://oauth2.googleapis.com/token",
+        "358961584307-33g6eh5pqrr5t7snk8ta9qqejmtmt8kp.apps.googleusercontent.com", // client id
+        "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" // client secret (it's not actually a secret for desktop applications)
+    );
 }
 
 void QRequest::gmailGetUnparsedMails(
