@@ -5,4 +5,6 @@ target_sources(MultimediaManager
 
     PUBLIC gmail-account.cpp
     PUBLIC gmail-account-with-recipients.cpp
+    PUBLIC outlook-account.cpp
+    PUBLIC outlook-account-with-recipients.cpp
 )

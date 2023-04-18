@@ -49,6 +49,9 @@ void QRequest::authGet(std::size_t request, const std::string& url, const std::s
 void QRequest::post(std::size_t request, const std::string& url, const std::unordered_map<std::string, std::string>& postFields) {
     emit onResponse(request, Request::post(url, postFields));
 }
+void QRequest::postJson(std::size_t request, const std::string& url, const json& postFields) {
+    emit onResponse(request, Request::postJson(url, postFields));
+}
 
 void QRequest::smtp(
     std::size_t request,
@@ -70,24 +73,6 @@ void QRequest::imap(
 }
 void QRequest::authIMAP(std::size_t request, const std::string& url, const std::string& user, const std::string& oauthBearer) {
     emit onResponse(request, Request::authIMAP(url, user, oauthBearer));
-}
-
-void QRequest::gmailGetUser(
-    std::size_t request,
-    const std::string& oauthBearer
-) {
-    std::string* response = Request::authGet("https://gmail.googleapis.com/gmail/v1/users/me/profile", oauthBearer);
-    if (response == nullptr) {
-        emit onResponse(request, nullptr);
-        return;
-    }
-
-    json jsonResponse = json::parse(*response);
-    delete response;
-    if (!jsonResponse.contains("emailAddress")) {
-        emit onResponse(request, nullptr);
-    }
-    emit onResponse(request, new std::string(jsonResponse.at("emailAddress")));
 }
 
 void QRequest::refreshAuthToken(
@@ -140,7 +125,9 @@ void QRequest::oauth2(
     oauth->setAuthorizationUrl(QUrl(QString::fromStdString(authorizationUrl)));
     oauth->setAccessTokenUrl(QUrl(QString::fromStdString(accessTokenUrl)));
     oauth->setClientIdentifier(QString::fromStdString(clientId));
-    oauth->setClientIdentifierSharedKey(QString::fromStdString(clientSecret));
+    if (clientSecret != "") {
+        oauth->setClientIdentifierSharedKey(QString::fromStdString(clientSecret));
+    }
     oauth->setModifyParametersFunction([](QAbstractOAuth::Stage stage, QMultiMap<QString, QVariant>* parameters) {
         // Percent-decode the "code" parameter so Google can match it
         if (stage == QAbstractOAuth::Stage::RequestingAccessToken) {
@@ -178,6 +165,24 @@ void QRequest::gmailOAuth(std::size_t requestAuthToken, std::size_t requestRefre
         "358961584307-33g6eh5pqrr5t7snk8ta9qqejmtmt8kp.apps.googleusercontent.com", // client id
         "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" // client secret (it's not actually a secret for desktop applications)
     );
+}
+
+void QRequest::gmailGetUser(
+    std::size_t request,
+    const std::string& oauthBearer
+) {
+    std::string* response = Request::authGet("https://gmail.googleapis.com/gmail/v1/users/me/profile", oauthBearer);
+    if (response == nullptr) {
+        emit onResponse(request, nullptr);
+        return;
+    }
+
+    json jsonResponse = json::parse(*response);
+    delete response;
+    if (!jsonResponse.contains("emailAddress")) {
+        emit onResponse(request, nullptr);
+    }
+    emit onResponse(request, new std::string(jsonResponse.at("emailAddress")));
 }
 
 void QRequest::gmailGetUnparsedMails(
@@ -292,7 +297,7 @@ const std::unordered_map<std::string, int> MONTH_MAP = {
     {"Nov", 10},
     {"Dec", 11}
 };
-std::chrono::high_resolution_clock::time_point toTimePoint(const std::string& dateString) {
+std::chrono::high_resolution_clock::time_point gmailDateToTimePoint(const std::string& dateString) {
     struct tm tm = { 0 };
     std::from_chars(dateString.data(), dateString.data() + 2, tm.tm_mday);
     tm.tm_mon = MONTH_MAP.at(dateString.substr(3, 3));
@@ -344,7 +349,7 @@ std::map<Inbox::Info, std::string> QRequest::gmailParseMails(std::string_view em
         std::size_t finishedPos = emailsString.find(FINISHED_SENTINEL, i);
         if (finishedPos < headerFieldEnd) {
             allMails[Inbox::Info {
-                .time = toTimePoint(dateString),
+                .time = gmailDateToTimePoint(dateString),
                 .uniqueId = gmailThreadId,
                 .from = fixQuotedString(fromString),
                 .to = fixQuotedString(toString),
@@ -384,4 +389,125 @@ std::map<Inbox::Info, std::string> QRequest::gmailParseMails(std::string_view em
     }
 
     return allMails;
+}
+
+void QRequest::outlookOAuth(std::size_t requestAuthToken, std::size_t requestRefreshToken) {
+    oauth2(
+        requestAuthToken,
+        requestRefreshToken,
+        "https://graph.microsoft.com/User.Read https://graph.microsoft.com/Mail.Send https://graph.microsoft.com/Mail.Read",
+        "https://login.microsoftonline.com/common/oauth2/v2.0/authorize",
+        "https://login.microsoftonline.com/common/oauth2/v2.0/token",
+        "4c15dfee-a228-4233-930e-c7fcedc94769", // client id
+        "" // no client secret for outlook
+    );    	
+}
+
+void QRequest::outlookGetUser(std::size_t request, const std::string& oauthBearer) {
+    std::string* response = Request::authGet("https://graph.microsoft.com/v1.0/me", oauthBearer);
+    if (response == nullptr) {
+        emit onResponse(request, nullptr);
+        return;
+    }
+
+    json jsonResponse = json::parse(*response);
+    delete response;
+    if (!jsonResponse.contains("userPrincipalName")) {
+        emit onResponse(request, nullptr);
+        return;
+    }
+
+    emit onResponse(request, new std::string(jsonResponse.at("userPrincipalName")));
+}
+
+
+void QRequest::outlookGetUnparsedMails(std::size_t request, const std::string& oauthBearer) {
+    emit onResponse(request, Request::authGet("https://graph.microsoft.com/v1.0/me/messages", oauthBearer));
+}
+
+// 2023-04-17T20:55:35Z
+std::chrono::high_resolution_clock::time_point outlookDateToTimePoint(const std::string& dateString) {
+    struct tm tm = { 0 };
+    std::from_chars(dateString.data(), dateString.data() + 4, tm.tm_year);
+    tm.tm_year -= 1900;
+    std::from_chars(dateString.data() + 5, dateString.data() + 7, tm.tm_mon);
+    --tm.tm_mon;
+    std::from_chars(dateString.data() + 8, dateString.data() + 10, tm.tm_mday);
+    std::from_chars(dateString.data() + 11, dateString.data() + 13, tm.tm_hour);
+    std::from_chars(dateString.data() + 14, dateString.data() + 16, tm.tm_min);
+    std::from_chars(dateString.data() + 17, dateString.data() + 19, tm.tm_sec);
+    return std::chrono::high_resolution_clock::from_time_t(mktime(&tm));
+}
+
+std::map<Inbox::Info, std::string> QRequest::outlookParseMails(std::string_view emailsString, const std::string& user) {
+    std::map<Inbox::Info, std::string> allMails;
+
+    auto hasher = std::hash<std::string>();
+
+    json emailJson = json::parse(emailsString);
+    if (!emailJson.contains("value")) {
+        return allMails;
+    }
+
+    for (json messageJson : emailJson.at("value")) {
+        std::string toRecipients;
+        for (json toRecipient : messageJson.at("toRecipients")) {
+            toRecipients += std::string(toRecipient.at("emailAddress").at("name")) + std::string(" ") + std::string(toRecipient.at("emailAddress").at("address")) + "\n";
+        }
+        // remove last newline
+        toRecipients.resize(toRecipients.size() - 1);
+
+        allMails[Inbox::Info {
+            .time = outlookDateToTimePoint(messageJson.at("receivedDateTime")),
+            .uniqueId = hasher(messageJson.at("id")),
+            .from = std::string(messageJson.at("from").at("emailAddress").at("name")) + std::string(" ") + std::string(messageJson.at("from").at("emailAddress").at("address")),
+            .to = toRecipients,
+            .subject = messageJson.at("subject")
+        }] = messageJson.at("webLink");
+    }
+    
+    return allMails;
+}
+
+void QRequest::outlookSendMail(
+    std::size_t request,
+    const std::string& oauthBearer,
+    const Request::SMTPHeaders& headers,
+    const Request::MimeData& mimeData
+) {
+    json messageJson = {
+        {"message", {
+            {"subject", headers.subject()},
+            {"body", {
+                {"contentType", "Text"},
+                {"content", mimeData.stringRepresentation()}
+            }},
+            {"toRecipients", {}},
+            {"ccRecipients", {}},
+        }},
+        {"saveToSentItems", "true"}
+    };
+
+    for (auto it = headers.toBegin(); it != headers.toEnd(); ++it) {
+        messageJson.at("message").at("toRecipients").push_back(json({
+            {"emailAddress", {
+                {"address", *it}
+            }} 
+        }));
+    }
+    if (messageJson.at("message").at("toRecipients").is_null()) {
+        messageJson.at("message").erase("toRecipients");
+    }
+    for (auto it = headers.ccBegin(); it != headers.ccEnd(); ++it) {
+        messageJson.at("message").at("ccRecipients").push_back(json({
+            {"emailAddress", {
+                {"address", *it}
+            }} 
+        }));
+    }
+    if (messageJson.at("message").at("ccRecipients").is_null()) {
+        messageJson.at("message").erase("ccRecipients");
+    }
+
+    emit onResponse(request, Request::authPostJson("https://graph.microsoft.com/v1.0/me/sendMail", oauthBearer, messageJson));
 }

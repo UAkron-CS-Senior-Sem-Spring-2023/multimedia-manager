@@ -5,4 +5,5 @@ target_sources(MultimediaManager
     PUBLIC validatable-add-account-page.cpp
 
     PUBLIC add-gmail-account-page.cpp
+    PUBLIC add-outlook-account-page.cpp
 )

@@ -22,6 +22,7 @@ class QRequest : public QObject {
         void get(std::size_t request, const std::string& url);
         void authGet(std::size_t request, const std::string& url, const std::string& oauthBearer);
         void post(std::size_t request, const std::string& url, const std::unordered_map<std::string, std::string>& postFields);
+        void postJson(std::size_t request, const std::string& url, const json& postFields);
         void smtp(
             std::size_t request,
             const std::string& url,
@@ -63,6 +64,23 @@ class QRequest : public QObject {
             const std::string& oauthBearer
         );
         static std::map<Inbox::Info, std::string> gmailParseMails(std::string_view emailsString, const std::string& user);
+
+        void outlookOAuth(std::size_t requestAuthToken, std::size_t requestRefreshToken);
+
+        void outlookGetUser(
+            std::size_t request,
+            const std::string& oauthBearer
+        );
+        
+        void outlookSendMail(
+            std::size_t request,
+            const std::string& oauthBearer,
+            const Request::SMTPHeaders& headers,
+            const Request::MimeData& mimeData
+        );
+        
+        void outlookGetUnparsedMails(std::size_t request, const std::string& oauthBearer);
+        static std::map<Inbox::Info, std::string> outlookParseMails(std::string_view emailsString, const std::string& user);
     signals:
         void onResponse(std::size_t request, std::string* response);
 

@@ -11,6 +11,8 @@
 #include <unordered_map>
 
 #include <curl/curl.h>
+#include <nlohmann/json.hpp>
+using json = nlohmann::json;
 
 struct ImplRequest {
     struct Deleters {
@@ -22,15 +24,15 @@ class Request {
     public:
         class Constants {
             public:
-                static const char* GMAIL_SMTP;
-                static const char* GMAIL_IMAP;
+                static const std::string GMAIL_SMTP;
+                static const std::string GMAIL_IMAP;
         };
 
         class SMTPHeaders {
             public:
                 template <class ToRecipientsContainer>
                 SMTPHeaders(std::string from, std::string subject, const ToRecipientsContainer& toRecipients)
-                    : from(from) {
+                    : subject_(subject), from_(from) {
                     if (toRecipients.size() == 0) {
                         throw std::logic_error("There must be at least 1 recipient");
                     }
@@ -49,6 +51,7 @@ class Request {
 
                     std::string toStr = "To:";
                     for (const auto& toRecipient : toRecipients) {
+                        toRecipients_.push_back(toRecipient);
                         curlMailRecipients_ = curl_slist_append(curlMailRecipients_, toRecipient.c_str());
                         toStr += " " + toRecipient;
                     }
@@ -85,6 +88,7 @@ class Request {
                     std::string ccStr = "Cc:";
                     for (const auto& ccRecipient : ccRecipients) {
                         curlMailRecipients_ = curl_slist_append(curlMailRecipients_, ccRecipient.c_str());
+                        ccRecipients_.push_back(ccRecipient);
                         ccStr += " " + ccRecipient;
                     }
                     curlHeaders_ = curl_slist_append(curlHeaders_, ccStr.c_str());
@@ -99,11 +103,22 @@ class Request {
                 const std::string& curlMailFrom() const;
                 const curl_slist* curlMailRecipients() const;
                 const curl_slist* curlHeaders() const;
+
+                const std::string& subject() const;
+                const std::string& from() const;
+                using iterator = std::vector<std::string>::const_iterator;
+                iterator toBegin() const;
+                iterator toEnd() const;
+                iterator ccBegin() const;
+                iterator ccEnd() const;
             private:
                 mutable curl_slist* curlMailRecipients_ = nullptr;
                 mutable curl_slist* curlHeaders_ = nullptr;
 
-                std::string from;
+                std::string subject_;
+                std::string from_;
+                std::vector<std::string> toRecipients_;
+                std::vector<std::string> ccRecipients_;
         };
 
         class MimeData {
@@ -128,7 +143,9 @@ class Request {
         static std::string* post(const std::string& url, const PostFieldIterable& postFieldss) {
             return singleton().postImpl(url, postFieldss);
         }
-        
+        static std::string* postJson(const std::string& url, const json& postFields);
+        static std::string* authPostJson(const std::string& url, const std::string& oauthBearer, const json& postFields);
+
         static std::string* smtp(
             const std::string& url,
             const std::string& oauthBearer,
@@ -167,6 +184,8 @@ class Request {
                 return data;
             }
         }
+        std::string* postJsonImpl(const std::string& url, const json& postFields);
+        std::string* authPostJsonImpl(const std::string& url, const std::string& oauthBearer, const json& postFields);
         
         std::string* smtpImpl(
             const std::string& url,

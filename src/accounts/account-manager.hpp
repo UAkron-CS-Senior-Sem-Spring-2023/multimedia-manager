@@ -31,7 +31,8 @@ class AccountManager : public QObject {
         };
 
         enum AccountVendor {
-            GMAIL
+            GMAIL,
+            OUTLOOK
         };
 
 

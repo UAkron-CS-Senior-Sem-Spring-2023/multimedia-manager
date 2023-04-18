@@ -6,6 +6,7 @@
 #include <QVBoxLayout>
 
 #include "add-gmail-account-page.hpp"
+#include "add-outlook-account-page.hpp"
 
 AddAccountWizard::AddAccountWizard(QWidget* parent)
     : QWizard(parent),
@@ -75,5 +76,9 @@ void AddAccountWizard::initializeAccountSpecificPageMap() {
     accountSpecificPageMap_.insert_or_assign(AccountManager::GMAIL, AccountSpecificPageInfo {
         .radioButton = new QRadioButton(tr("Gmail")),
         .page = new AddGmailAccountPage(this)
+    });
+    accountSpecificPageMap_.insert_or_assign(AccountManager::OUTLOOK, AccountSpecificPageInfo {
+        .radioButton = new QRadioButton(tr("Outlook")),
+        .page = new AddOutlookAccountPage(this)
     });
 }

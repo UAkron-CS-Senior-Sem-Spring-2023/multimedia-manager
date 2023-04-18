@@ -6,8 +6,8 @@
 
 #include "base64/include/base64.hpp"
 
-const char* Request::Constants::GMAIL_SMTP = "smtp://smtp.gmail.com:587";
-const char* Request::Constants::GMAIL_IMAP = "imaps://imap.gmail.com:993";
+const std::string Request::Constants::GMAIL_SMTP = "smtp://smtp.gmail.com:587";
+const std::string Request::Constants::GMAIL_IMAP = "imaps://imap.gmail.com:993";
 
 Request::Request() {
     curl_global_init(CURL_GLOBAL_ALL);
@@ -102,6 +102,58 @@ std::string* Request::postImpl(const std::string& url, const std::unordered_map<
     }
 }
 
+std::string* Request::postJson(const std::string& url, const json& postFields) {
+    return singleton().postImpl(url, postFields);
+}
+std::string* Request::postJsonImpl(const std::string& url, const json& postFields) {
+    data = new std::string;
+    curl_easy_setopt(handle, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, handleDataStatic);
+    std::string jsonString = postFields.dump();
+    curl_easy_setopt(handle, CURLOPT_POSTFIELDS, jsonString.c_str());
+    curl_slist* jsonHeaders = nullptr;
+    jsonHeaders = curl_slist_append(jsonHeaders, "Content-Type: application/json");
+    curl_easy_setopt(handle, CURLOPT_HTTPHEADER, jsonHeaders);
+
+    auto status = curl_easy_perform(handle);
+    curl_slist_free_all(jsonHeaders);
+    if (status != CURLE_OK) {
+        delete data;
+        return nullptr;
+    } else {
+        return data;
+    }
+}
+#include <iostream>
+std::string* Request::authPostJson(const std::string& url, const std::string& oauthBearer, const json& postFields) {
+    return singleton().authPostJsonImpl(url, oauthBearer, postFields);
+}
+std::string* Request::authPostJsonImpl(const std::string& url, const std::string& oauthBearer, const json& postFields) {
+    data = new std::string;
+    curl_easy_setopt(handle, CURLOPT_URL, url.c_str());
+    curl_slist* jsonHeaders = nullptr;
+    jsonHeaders = curl_slist_append(jsonHeaders, "Content-Type: application/json");
+    std::string authorizationHeader = std::string("Authorization: Bearer ") + oauthBearer;
+    jsonHeaders = curl_slist_append(jsonHeaders, authorizationHeader.c_str());
+    curl_easy_setopt(handle, CURLOPT_HTTPHEADER, jsonHeaders);
+    curl_easy_setopt(handle, CURLOPT_XOAUTH2_BEARER, oauthBearer.c_str());
+    curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, handleDataStatic);
+    std::string jsonString = postFields.dump();
+    curl_easy_setopt(handle, CURLOPT_POSTFIELDS, jsonString.c_str());
+
+    std::cout << "he's trying " << url << ' ' << oauthBearer << '\n' << jsonString << std::endl;
+    auto status = curl_easy_perform(handle);
+    curl_slist_free_all(jsonHeaders);
+    if (status != CURLE_OK) {
+        std::cout << curl_easy_strerror(status) << std::endl;
+        delete data;
+        return nullptr;
+    } else {
+        std::cout << "response: " << *data << std::endl;
+        return data;
+    }
+}
+
 std::string* Request::smtp(
     const std::string& url,
     const std::string& oauthBearer,
@@ -190,7 +242,7 @@ Request::SMTPHeaders::~SMTPHeaders() {
 }
 
 const std::string& Request::SMTPHeaders::curlMailFrom() const {
-    return from;
+    return from_;
 }
 
 const curl_slist* Request::SMTPHeaders::curlMailRecipients() const {
@@ -199,6 +251,28 @@ const curl_slist* Request::SMTPHeaders::curlMailRecipients() const {
 
 const curl_slist* Request::SMTPHeaders::curlHeaders() const {
     return curlHeaders_;
+}
+
+const std::string& Request::SMTPHeaders::subject() const {
+    return subject_;
+}
+
+const std::string& Request::SMTPHeaders::from() const {
+    return from_;
+}
+
+typename std::vector<std::string>::const_iterator Request::SMTPHeaders::toBegin() const {
+    return toRecipients_.cbegin();
+}
+typename std::vector<std::string>::const_iterator Request::SMTPHeaders::toEnd() const {
+    return toRecipients_.cend();
+}
+
+typename std::vector<std::string>::const_iterator Request::SMTPHeaders::ccBegin() const {
+    return ccRecipients_.cbegin();
+}
+typename std::vector<std::string>::const_iterator Request::SMTPHeaders::ccEnd() const {
+    return ccRecipients_.cend();
 }
 
 void ImplRequest::Deleters::operator()(curl_mime* mime) {
