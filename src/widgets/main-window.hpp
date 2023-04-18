@@ -26,19 +26,19 @@ class MainWindow : public QMainWindow {
     public:
         MainWindow(QWidget* parent = nullptr);
 
-        const Account* selectedAccount() const;
-        const AccountGroup* selectedAccountGroup() const;
-        void changeSelectedAccount(const Account* account);
-        void changeSelectedAccountGroup(const AccountGroup* accountGroup);
+        Account* selectedAccount();
+        AccountGroup* selectedAccountGroup();
+        void changeSelectedAccount(Account* account);
+        void changeSelectedAccountGroup(AccountGroup* accountGroup);
     signals:
         void onUpdateManagingType(AccountManager::ManagingType managingType);
-        void selectedAccountChanged(const Account* account);
+        void selectedAccountChanged(Account* account);
         void selectedAccountSourceRecipientTypeChanged(AccountManager::SourceRecipientType sourceRecipientType);
-        void selectedAccountGroupChanged(const AccountGroup* accountGroup);
+        void selectedAccountGroupChanged(AccountGroup* accountGroup);
         void selectedAccountGroupSourceRecipientTypeChanged(AccountManager::SourceRecipientType sourceRecipientType);
     private:
-        const Account* selectedAccount_;
-        const AccountGroup* selectedAccountGroup_;
+        Account* selectedAccount_;
+        AccountGroup* selectedAccountGroup_;
 
         void manageableAccountsButtonClicked();
         void manageableAccountGroupsButtonClicked();

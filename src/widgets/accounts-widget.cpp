@@ -31,7 +31,7 @@ AccountsWidget::AccountsWidget(MainWindow* mainWindow, QWidget* parent)
         accountNames.clear();
         
         int workingRow = 0;
-        for (const auto* account : accounts) {
+        for (auto* account : accounts) {
             accountNames.push_back(std::make_unique<QPushButton>(QString::fromStdString(account->name())));
             accountNamesLayout->addWidget(accountNames.back().get(), workingRow++, 0);
             connect(accountNames.back().get(), &QPushButton::clicked, [this, account](){
@@ -55,7 +55,7 @@ AccountsWidget::AccountsWidget(MainWindow* mainWindow, QWidget* parent)
         accountGroupNames.clear();
 
         int workingRow = 0;
-        for (const auto* accountGroup : accountGroups) {
+        for (auto* accountGroup : accountGroups) {
             accountGroupNames.push_back(std::make_unique<QPushButton>(QString::fromStdString(accountGroup->name())));
             accountGroupNamesLayout->addWidget(accountGroupNames.back().get(), workingRow++, 0);
             connect(accountGroupNames.back().get(), &QPushButton::clicked, [this, accountGroup](){
@@ -80,7 +80,16 @@ AccountsWidget::AccountsWidget(MainWindow* mainWindow, QWidget* parent)
     connect(addManageableAccountButton, &QPushButton::clicked, [this]() {
         addAccountWizard.show();
     });
-    auto* removeManageableAccountButton = new QPushButton(tr("Remove Account"));
+    auto* removeManageableAccountButton = new QPushButton(tr("Remove Selected Account"));
+    removeManageableAccountButton->setEnabled(false);
+    connect(mainWindow, &MainWindow::selectedAccountChanged, [removeManageableAccountButton](const Account* account) {
+        removeManageableAccountButton->setEnabled(account != nullptr);
+    });
+    connect(removeManageableAccountButton, &QPushButton::clicked, [this]() {
+        auto* selectedAccount = this->mainWindow->selectedAccount();
+        this->mainWindow->changeSelectedAccount(nullptr);
+        AccountManager::singleton().removeAccount(selectedAccount);
+    });
 
     modifyManageableAccountLayout->addWidget(addManageableAccountButton);
     modifyManageableAccountLayout->addStretch(1);
@@ -94,7 +103,16 @@ AccountsWidget::AccountsWidget(MainWindow* mainWindow, QWidget* parent)
     connect(addManageableAccountGroupButton, &QPushButton::clicked, [this]() {
         addAccountGroupWizard.show();
     });
-    auto removeManageableAccountGroupButton = new QPushButton(tr("Remove Account Group"));
+    auto removeManageableAccountGroupButton = new QPushButton(tr("Remove Selected Account Group"));
+    removeManageableAccountGroupButton->setEnabled(false);
+    connect(mainWindow, &MainWindow::selectedAccountGroupChanged, [removeManageableAccountGroupButton](const AccountGroup* accountGroup) {
+        removeManageableAccountGroupButton->setEnabled(accountGroup != nullptr);
+    });
+    connect(removeManageableAccountGroupButton, &QPushButton::clicked, [this]() {
+        auto* selectedAccountGroup = this->mainWindow->selectedAccountGroup();
+        this->mainWindow->changeSelectedAccountGroup(nullptr);
+        AccountManager::singleton().removeAccountGroup(selectedAccountGroup);
+    });
 
     modifyManageableAccountGroupLayout->addWidget(addManageableAccountGroupButton);
     modifyManageableAccountGroupLayout->addStretch(1);

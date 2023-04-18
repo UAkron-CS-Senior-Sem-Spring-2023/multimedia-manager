@@ -40,6 +40,8 @@ class AccountManager : public QObject {
         void addRecipientAccount(std::unique_ptr<RecipientAccount> recipientAccount);
         void addDualAccount(std::unique_ptr<DualAccount> dualAccount);
         void addAccountGroup(std::unique_ptr<AccountGroup> accountGroup);
+        void removeAccount(Account* account);
+        void removeAccountGroup(AccountGroup* accountGroup);
 
         SourceRecipientType accountSourceRecipientType(const Account* account) const;
 
@@ -59,6 +61,7 @@ class AccountManager : public QObject {
         static std::unique_ptr<AccountManager> singleton_;
 
         std::list<std::unique_ptr<Account>> accountsOwned;
+        std::unordered_map<const Account*, typename std::list<std::unique_ptr<Account>>::iterator> accountsOwnedLocations;
         std::unordered_map<const Account*, SourceRecipientType> accountSourceRecipientTypes_;
         SetList<Account*> accounts_;
         SetList<SourceAccount*> sourceAccounts_;
@@ -66,6 +69,7 @@ class AccountManager : public QObject {
         SetList<DualAccount*> dualAccounts_;
 
         std::list<std::unique_ptr<AccountGroup>> accountGroupsOwned;
+        std::unordered_map<const AccountGroup*, typename std::list<std::unique_ptr<AccountGroup>>::iterator> accountGroupsOwnedLocations;
         SetList<AccountGroup*> accountGroups_;
         
 };
