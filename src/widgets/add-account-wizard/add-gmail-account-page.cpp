@@ -67,7 +67,6 @@ AddGmailAccountPage::AddGmailAccountPage(AddAccountWizard* addAccountWizard, QWi
             return;
         }
         refreshToken = std::string(*response);
-        std::cout << refreshToken << std::endl;
         delete response;
 
         QRequest::singleton().gmailGetUser(verifyRequest, oauthBearer);

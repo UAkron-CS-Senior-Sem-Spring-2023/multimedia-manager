@@ -141,15 +141,12 @@ std::string* Request::authPostJsonImpl(const std::string& url, const std::string
     std::string jsonString = postFields.dump();
     curl_easy_setopt(handle, CURLOPT_POSTFIELDS, jsonString.c_str());
 
-    std::cout << "he's trying " << url << ' ' << oauthBearer << '\n' << jsonString << std::endl;
     auto status = curl_easy_perform(handle);
     curl_slist_free_all(jsonHeaders);
     if (status != CURLE_OK) {
-        std::cout << curl_easy_strerror(status) << std::endl;
         delete data;
         return nullptr;
     } else {
-        std::cout << "response: " << *data << std::endl;
         return data;
     }
 }

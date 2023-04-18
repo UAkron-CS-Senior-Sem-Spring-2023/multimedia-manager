@@ -100,7 +100,12 @@ AccountInfoWidget::AccountInfoWidget(MainWindow* mainWindow, QWidget* parent)
     auto* managingAccountSendMessageButton = new QPushButton(tr("Send message"));
     managingAccountSendMessageButton->setEnabled(false);
     connect(&accountSendMessageWizard, &SendMessageWizard::gotMessage, [this](std::string subject, Request::MimeData mimeData) {
-        dynamic_cast<const RecipientAccount*>(this->mainWindow->selectedAccount())->send(std::move(subject), std::move(mimeData));
+        auto sourceRecipientType = AccountManager::singleton().accountSourceRecipientType(this->mainWindow->selectedAccount());
+        if (sourceRecipientType == AccountManager::RECIPIENT) {
+            dynamic_cast<const RecipientAccount*>(this->mainWindow->selectedAccount())->send(std::move(subject), std::move(mimeData));
+        } else if (sourceRecipientType == AccountManager::DUAL) {
+            dynamic_cast<const DualAccount*>(this->mainWindow->selectedAccount())->send(std::move(subject), std::move(mimeData));
+        }
     });
     connect(managingAccountSendMessageButton, &QPushButton::clicked, [this]() {
         accountSendMessageWizard.show();
@@ -118,7 +123,12 @@ AccountInfoWidget::AccountInfoWidget(MainWindow* mainWindow, QWidget* parent)
     auto* managingAccountViewInboxButton = new QPushButton(tr("View inbox"));
     managingAccountViewInboxButton->setEnabled(false);
     connect(managingAccountViewInboxButton, &QPushButton::clicked, [this]() {
-        viewInboxDialog.setInbox(&dynamic_cast<const SourceAccount*>(this->mainWindow->selectedAccount())->inbox());
+        auto sourceRecipientType = AccountManager::singleton().accountSourceRecipientType(this->mainWindow->selectedAccount());
+        if (sourceRecipientType == AccountManager::SOURCE) {
+            viewInboxDialog.setInbox(&dynamic_cast<const SourceAccount*>(this->mainWindow->selectedAccount())->inbox());
+        } else if (sourceRecipientType == AccountManager::DUAL) {
+            viewInboxDialog.setInbox(&dynamic_cast<const DualAccount*>(this->mainWindow->selectedAccount())->inbox());
+        }
         viewInboxDialog.populateInboxes();
     });
 
@@ -139,7 +149,12 @@ AccountInfoWidget::AccountInfoWidget(MainWindow* mainWindow, QWidget* parent)
     managingAccountGroupSendMessageButton->setEnabled(false);
     connect(&accountGroupSendMessageWizard, &SendMessageWizard::gotMessage, [this](std::string subject, Request::MimeData mimeData) {
         for (const auto* account : *this->mainWindow->selectedAccountGroup()) {
-            dynamic_cast<const RecipientAccount*>(account)->send(std::move(subject), std::move(mimeData));
+            auto sourceRecipientType = AccountManager::singleton().accountSourceRecipientType(account);
+            if (sourceRecipientType == AccountManager::RECIPIENT) {
+                dynamic_cast<const RecipientAccount*>(account)->send(std::move(subject), std::move(mimeData));
+            } else if (sourceRecipientType == AccountManager::DUAL) {
+                dynamic_cast<const DualAccount*>(account)->send(std::move(subject), std::move(mimeData));
+            }
         }
     });
     connect(managingAccountGroupSendMessageButton, &QPushButton::clicked, [this](){
@@ -156,7 +171,12 @@ AccountInfoWidget::AccountInfoWidget(MainWindow* mainWindow, QWidget* parent)
     connect(managingAccountGroupViewInboxButton, &QPushButton::clicked, [this]() {
         viewInboxDialog.clearInboxes();
         for (const auto* account : *this->mainWindow->selectedAccountGroup()) {
-            viewInboxDialog.addInbox(&dynamic_cast<const SourceAccount*>(account)->inbox());
+            auto sourceRecipientType = AccountManager::singleton().accountSourceRecipientType(account);
+            if (sourceRecipientType == AccountManager::SOURCE) {
+                viewInboxDialog.addInbox(&dynamic_cast<const SourceAccount*>(account)->inbox());
+            } else if (sourceRecipientType == AccountManager::DUAL) {
+                viewInboxDialog.addInbox(&dynamic_cast<const DualAccount*>(account)->inbox());
+            }
         }
         viewInboxDialog.populateInboxes();
     });

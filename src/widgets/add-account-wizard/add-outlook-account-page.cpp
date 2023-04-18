@@ -67,7 +67,6 @@ AddOutlookAccountPage::AddOutlookAccountPage(AddAccountWizard* addAccountWizard,
             return;
         }
         refreshToken = std::string(*response);
-        std::cout << refreshToken << std::endl;
         delete response;
 
         QRequest::singleton().outlookGetUser(verifyRequest, oauthBearer);
