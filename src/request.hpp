@@ -123,16 +123,14 @@ class Request {
 
         class MimeData {
             public:
-                MimeData();
-
                 void addText(const std::string& text);
 
                 const std::string& stringRepresentation() const;
-                const curl_mime* curlMimePost() const;
+                curl_mime* curlMimePost(CURL* handle) const;
             private:
                 bool onlyStringContents = true;
                 std::string stringRepresentation_;
-                curl_mime* mime;
+                std::vector<std::string> addTexts;
         };
 
 
@@ -163,6 +161,7 @@ class Request {
         template <class PostFieldIterable>
         std::string* postImpl(const std::string& url, const PostFieldIterable& postFieldss) {
             data = new std::string;
+            auto* handle = curl_easy_init();
             curl_easy_setopt(handle, CURLOPT_URL, url.c_str());
             curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, handleDataStatic);
 
@@ -199,7 +198,6 @@ class Request {
 
         static Request& singleton();
 
-        CURL* handle;
         std::unordered_map<std::string, std::unordered_map<std::string, CURL*>> imapConnectionHandles;
         std::unordered_map<std::string, std::unordered_set<std::string>> imapAuthenticatedUsers;
         std::string* data;

@@ -62,6 +62,7 @@ void ViewInboxDialog::populateInboxes() {
             if (inboxesPopulated.at(false).size() == 0) {
                 allInboxesPopulatedSignal();
             }
+            disconnect(*it, nullptr, nullptr, nullptr);
         });
     }
     for (auto it = std::next(inboxesPopulated.at(false).begin()); it != inboxesPopulated.at(false).end(); ++it) {
@@ -71,6 +72,10 @@ void ViewInboxDialog::populateInboxes() {
 }
 
 void ViewInboxDialog::clearInboxes() {
+    for (const auto& inbox : inboxesPopulated.at(false)) {
+        disconnect(inbox, nullptr, nullptr, nullptr);
+    }
+    
     inboxesPopulated.at(false).clear();
     inboxesPopulated.at(true).clear();
 }

@@ -11,7 +11,6 @@ const std::string Request::Constants::GMAIL_IMAP = "imaps://imap.gmail.com:993";
 
 Request::Request() {
     curl_global_init(CURL_GLOBAL_ALL);
-    handle = curl_easy_init();
 }
 
 std::unique_ptr<Request> requestSingleton_ = nullptr;
@@ -41,9 +40,13 @@ std::string* Request::get(const std::string& url) {
 }
 std::string* Request::getImpl(const std::string& url) {
     data = new std::string;
+    auto* handle = curl_easy_init();
+
     curl_easy_setopt(handle, CURLOPT_URL, url.c_str());
     curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, handleDataStatic);
     auto status = curl_easy_perform(handle);
+    curl_easy_cleanup(handle);
+
     if (status != CURLE_OK) {
         delete data;
         return nullptr;
@@ -57,12 +60,16 @@ std::string* Request::authGet(const std::string& url, const std::string& oauthBe
 }
 std::string* Request::authGetImpl(const std::string& url, const std::string& oauthBearer) {
     data = new std::string;
+    auto* handle = curl_easy_init();
+
     curl_easy_setopt(handle, CURLOPT_URL, url.c_str());
     curl_easy_setopt(handle, CURLOPT_XOAUTH2_BEARER, oauthBearer.c_str());
     curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, handleDataStatic);
     curl_easy_setopt(handle, CURLOPT_HTTPAUTH, CURLAUTH_BEARER);
     curl_easy_setopt(handle, CURLOPT_USE_SSL, CURLUSESSL_ALL);
     auto status = curl_easy_perform(handle);
+    curl_easy_cleanup(handle);
+
     if (status != CURLE_OK) {
         delete data;
         return nullptr;
@@ -89,11 +96,15 @@ std::string* Request::post(const std::string& url, const std::unordered_map<std:
 }
 std::string* Request::postImpl(const std::string& url, const std::unordered_map<std::string, std::string>& postFields) {
     data = new std::string;
+    auto* handle = curl_easy_init();
+
     curl_easy_setopt(handle, CURLOPT_URL, url.c_str());
     curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, handleDataStatic);
     curl_easy_setopt(handle, CURLOPT_POSTFIELDS, postifyMappedValues(postFields).c_str());
 
     auto status = curl_easy_perform(handle);
+    curl_easy_cleanup(handle);
+
     if (status != CURLE_OK) {
         delete data;
         return nullptr;
@@ -107,6 +118,8 @@ std::string* Request::postJson(const std::string& url, const json& postFields) {
 }
 std::string* Request::postJsonImpl(const std::string& url, const json& postFields) {
     data = new std::string;
+    auto* handle = curl_easy_init();
+
     curl_easy_setopt(handle, CURLOPT_URL, url.c_str());
     curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, handleDataStatic);
     std::string jsonString = postFields.dump();
@@ -117,6 +130,8 @@ std::string* Request::postJsonImpl(const std::string& url, const json& postField
 
     auto status = curl_easy_perform(handle);
     curl_slist_free_all(jsonHeaders);
+    curl_easy_cleanup(handle);
+
     if (status != CURLE_OK) {
         delete data;
         return nullptr;
@@ -124,12 +139,14 @@ std::string* Request::postJsonImpl(const std::string& url, const json& postField
         return data;
     }
 }
-#include <iostream>
+
 std::string* Request::authPostJson(const std::string& url, const std::string& oauthBearer, const json& postFields) {
     return singleton().authPostJsonImpl(url, oauthBearer, postFields);
 }
 std::string* Request::authPostJsonImpl(const std::string& url, const std::string& oauthBearer, const json& postFields) {
     data = new std::string;
+    auto* handle = curl_easy_init();
+
     curl_easy_setopt(handle, CURLOPT_URL, url.c_str());
     curl_slist* jsonHeaders = nullptr;
     jsonHeaders = curl_slist_append(jsonHeaders, "Content-Type: application/json");
@@ -143,6 +160,8 @@ std::string* Request::authPostJsonImpl(const std::string& url, const std::string
 
     auto status = curl_easy_perform(handle);
     curl_slist_free_all(jsonHeaders);
+    curl_easy_cleanup(handle);
+
     if (status != CURLE_OK) {
         delete data;
         return nullptr;
@@ -166,6 +185,8 @@ std::string* Request::smtpImpl(
     const MimeData& mimeData
 ) {
     data = new std::string;
+    auto* handle = curl_easy_init();
+
     curl_easy_setopt(handle, CURLOPT_URL, url.c_str());
     curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, handleDataStatic);
     curl_easy_setopt(handle, CURLOPT_USERNAME, headers.curlMailFrom().c_str());
@@ -173,11 +194,15 @@ std::string* Request::smtpImpl(
     curl_easy_setopt(handle, CURLOPT_MAIL_FROM, headers.curlMailFrom().c_str());
     curl_easy_setopt(handle, CURLOPT_MAIL_RCPT, headers.curlMailRecipients());
     curl_easy_setopt(handle, CURLOPT_HTTPHEADER, headers.curlHeaders());
-    curl_easy_setopt(handle, CURLOPT_MIMEPOST, mimeData.curlMimePost());
+    auto* mime = mimeData.curlMimePost(handle);
+    curl_easy_setopt(handle, CURLOPT_MIMEPOST, mime);
     curl_easy_setopt(handle, CURLOPT_HTTPAUTH, CURLAUTH_BEARER);
     curl_easy_setopt(handle, CURLOPT_USE_SSL, CURLUSESSL_ALL);
 
     auto status = curl_easy_perform(handle);
+    curl_mime_free(mime);
+    curl_easy_cleanup(handle);
+
     if (status != CURLE_OK) {
         delete data;
         return nullptr;
@@ -192,6 +217,7 @@ std::string* Request::imap(const std::string& url, const std::string& user, cons
 
 std::string* Request::imapImpl(const std::string& url, const std::string& user, const std::string& imapCommands) {
     data = new std::string;
+
     if (imapConnectionHandles.count(url) == 0) {
         imapConnectionHandles[url] = std::unordered_map<std::string, CURL*>();
     }
@@ -208,6 +234,8 @@ std::string* Request::imapImpl(const std::string& url, const std::string& user, 
 
     auto status = curl_easy_perform(imapHandle);
     if (status != CURLE_OK) {
+        curl_easy_cleanup(imapHandle);
+        imapConnectionHandles.at(url).erase(user);
         delete data;
         return nullptr;
     } else {
@@ -272,17 +300,8 @@ typename std::vector<std::string>::const_iterator Request::SMTPHeaders::ccEnd() 
     return ccRecipients_.cend();
 }
 
-void ImplRequest::Deleters::operator()(curl_mime* mime) {
-    curl_mime_free(mime);
-}
-
-Request::MimeData::MimeData()
-    : mime(curl_mime_init(Request::singleton().handle))
-{}
-
 void Request::MimeData::addText(const std::string& text) {
-    curl_mimepart* part = curl_mime_addpart(mime);
-    curl_mime_data(part, text.c_str(), CURL_ZERO_TERMINATED);
+    addTexts.push_back(text);
     stringRepresentation_ += text;
 }
 
@@ -293,6 +312,11 @@ const std::string& Request::MimeData::stringRepresentation() const {
     return stringRepresentation_;
 }
 
-const curl_mime* Request::MimeData::curlMimePost() const {
+curl_mime* Request::MimeData::curlMimePost(CURL* handle) const {
+    auto* mime = curl_mime_init(handle);
+    for (const auto& text : addTexts) {
+        curl_mimepart* part = curl_mime_addpart(mime);
+        curl_mime_data(part, text.c_str(), CURL_ZERO_TERMINATED);
+    }
     return mime;
 }
