@@ -177,6 +177,7 @@ class Request {
             curl_easy_setopt(handle, CURLOPT_POSTFIELDS, postStr.c_str());
 
             auto status = curl_easy_perform(handle);
+            curl_easy_cleanup(handle);
             if (status != CURLE_OK) {
                 return nullptr;
             } else {
